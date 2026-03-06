@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+
+<html lang="ru"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1975d2",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#111921",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<title>Урок 2 — Персонажи | AutismSkillForge</title>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 transition-colors duration-300">
+<div class="relative flex min-h-screen w-full flex-col">
+<!-- Top Navigation Bar -->
+<header class="sticky top-0 z-50 w-full border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md px-4 md:px-10 py-3">
+<div class="max-w-7xl mx-auto flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="text-primary">
+<span class="material-symbols-outlined text-3xl">psychology</span>
+</div>
+<h2 class="text-lg font-bold leading-tight tracking-tight">AutismSkillForge</h2>
+</div>
+<nav class="hidden md:flex flex-1 justify-center gap-8">
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Курсы</a>
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Прогресс</a>
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Библиотека</a>
+</nav>
+<div class="flex items-center gap-4">
+<div class="rounded-full bg-primary/10 p-2 text-primary">
+<span class="material-symbols-outlined">notifications</span>
+</div>
+<div class="aspect-square bg-slate-200 dark:bg-slate-700 rounded-full h-10 w-10 overflow-hidden border-2 border-primary/20">
+<img alt="Profile" class="h-full w-full object-cover" data-alt="User profile avatar placeholder" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCX9ysT3-8vM4kcIUfag5kvHc-Y0-X_Qg-tx0GTa80Kt9psWTvESIwXK-WBXJx1wiTdbsv5PsfFhh80dxl7G7ik9DQxjXulsg_N8SraZfAiwI_NVJTIXUA-4R27jcYJoDw6VfuLyeJarTuc2fEUSKS8Cj34o-jhvT2wtw16-163GsOJMUshZE2iDWlqTGIqN4EkuXDEcawWSWMKv6XhbI6I1Ayu5J59LKr-iAZWhufSmLbHbLd8WeSXBOjCwkWV3fgvZVUWLAUykxdh"/>
+</div>
+</div>
+</div>
+</header>
+<main class="flex-1 w-full max-w-5xl mx-auto p-4 md:p-8 space-y-12">
+<!-- Section 1: Cover -->
+<section class="relative overflow-hidden rounded-xl bg-white dark:bg-slate-900 shadow-sm border border-slate-200 dark:border-slate-800">
+<div class="aspect-[21/9] w-full bg-slate-100 dark:bg-slate-800 relative group" data-alt="Illustration of diverse character icons representing social skills training" style='background-image: linear-gradient(to right, rgba(0,0,0,0.7), rgba(0,0,0,0.3)), url("https://lh3.googleusercontent.com/aida-public/AB6AXuCHmINI-nk3ps70BXWLX1pU_iQ1qpb5zgo5j7dUYiWXPJkqtz7omahLMYO-6EIfcKxtuqrH9PjMpfcg036ZPRDDSUMkipye4scLd6C1nuySdV_jCnskf229OFFg7ipV7fUZvrlAtCXEuxJJSrF8xLfypgFXnpdRv5AQ44VMco6RsRKiGK1v-pDhUfCSDAL8hFrZcWICCo-0gV9_28ayWb0nH4rBmleMpEzEt-uNlQzKFlYTgZh44v2edgxIPlRt-4My3kzt35YQJ-EB"); background-size: cover; background-position: center;'>
+<div class="absolute inset-0 flex flex-col justify-end p-6 md:p-12 text-white">
+<div class="inline-flex items-center gap-2 mb-4 px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm text-xs font-semibold uppercase tracking-wider">
+<span class="material-symbols-outlined text-sm">auto_stories</span> Модуль 1: Основы
+                    </div>
+<h1 class="text-3xl md:text-5xl font-extrabold mb-4">Урок 2 — Персонажи</h1>
+<p class="text-lg text-slate-200 max-w-2xl mb-8">В этом уроке мы разберем формирование связей между персонажами и их категориями, используя метод транзитивности.</p>
+<button class="w-fit flex items-center gap-3 px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold transition-all transform hover:scale-105">
+<span class="material-symbols-outlined">play_circle</span>
+                        Начать урок
+                    </button>
+</div>
+</div>
+</section>
+<!-- Section 2: Readiness Checklist -->
+<section class="space-y-6">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">fact_check</span>
+<h3 class="text-2xl font-bold">Чек-лист готовности</h3>
+</div>
+<div class="grid gap-4 bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<p class="text-slate-600 dark:text-slate-400 mb-2">Проверьте текущие навыки ребенка перед началом:</p>
+<div class="space-y-3">
+<label class="flex items-center justify-between p-4 rounded-lg border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 hover:border-emerald-500/50 transition-colors cursor-pointer group">
+<span class="font-medium text-slate-700 dark:text-slate-200">Ребенок понимает категории (люди, животные)</span>
+<div class="flex gap-2">
+<span class="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 flex items-center justify-center opacity-40 group-hover:opacity-100"><span class="material-symbols-outlined text-sm">done</span></span>
+<span class="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 flex items-center justify-center opacity-40"><span class="material-symbols-outlined text-sm">priority_high</span></span>
+<span class="w-8 h-8 rounded-full bg-rose-100 dark:bg-rose-900/30 text-rose-600 flex items-center justify-center opacity-40"><span class="material-symbols-outlined text-sm">close</span></span>
+</div>
+</label>
+<label class="flex items-center justify-between p-4 rounded-lg border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 hover:border-amber-500/50 transition-colors cursor-pointer group">
+<span class="font-medium text-slate-700 dark:text-slate-200">Отвечает на простые вопросы "Кто это?"</span>
+<div class="flex gap-2">
+<span class="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 flex items-center justify-center opacity-40"><span class="material-symbols-outlined text-sm">done</span></span>
+<span class="w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center"><span class="material-symbols-outlined text-sm">priority_high</span></span>
+<span class="w-8 h-8 rounded-full bg-rose-100 dark:bg-rose-900/30 text-rose-600 flex items-center justify-center opacity-40"><span class="material-symbols-outlined text-sm">close</span></span>
+</div>
+</label>
+<label class="flex items-center justify-between p-4 rounded-lg border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 hover:border-rose-500/50 transition-colors cursor-pointer group">
+<span class="font-medium text-slate-700 dark:text-slate-200">Удерживает внимание более 5 минут</span>
+<div class="flex gap-2">
+<span class="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 flex items-center justify-center opacity-40"><span class="material-symbols-outlined text-sm">done</span></span>
+<span class="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 flex items-center justify-center opacity-40"><span class="material-symbols-outlined text-sm">priority_high</span></span>
+<span class="w-8 h-8 rounded-full bg-rose-600 text-white flex items-center justify-center"><span class="material-symbols-outlined text-sm">close</span></span>
+</div>
+</label>
+</div>
+</div>
+</section>
+<!-- Section 3: Video Player -->
+<section class="space-y-6">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">video_library</span>
+<h3 class="text-2xl font-bold">Обучающее видео</h3>
+</div>
+<span class="text-sm font-medium text-primary">12:45 минут</span>
+</div>
+<div class="relative group rounded-xl overflow-hidden shadow-lg border-4 border-white dark:border-slate-800 aspect-video bg-slate-900">
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="w-20 h-20 bg-primary/90 rounded-full flex items-center justify-center text-white cursor-pointer hover:scale-110 transition-transform shadow-xl">
+<span class="material-symbols-outlined text-4xl">play_arrow</span>
+</div>
+</div>
+<div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent">
+<p class="text-white italic text-center font-medium">«Мы не учили эту связку напрямую, но ребенок начинает ее понимать»</p>
+</div>
+<img alt="Video thumbnail" class="w-full h-full object-cover opacity-60" data-alt="Still frame from training video showing a teacher and student" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB8h5NRstBtZdRHOs172UMWdDoAT8xvYRih5hOc4RZ39o_VDlXmav3xJe_KTpkqJDqZod7lK2BbIt1orTmxC5PKsomSi90seYISTby2Sz7Ivgqy4x6CQA9wcd__WJrP4MFQ79LYK9E-V8SzdL87XS8RxvY29NtIBYbRmykFoaLQC4e15WAQfQTr59h4LcmOA10yMEaQLqwncACiedJLvT6Jj5mgFZ_fFZ1kMiG1rbL5A3mgGUin8TVMjjqU1CtjMOSeIeTx0zpGiWG7"/>
+</div>
+</section>
+<!-- Section 4: Logic Chain Visualization -->
+<section class="space-y-6">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">account_tree</span>
+<h3 class="text-2xl font-bold">Логическая цепочка</h3>
+</div>
+<div class="bg-primary/5 dark:bg-slate-900 p-8 rounded-xl border border-primary/20">
+<div class="flex flex-col md:flex-row items-center justify-between gap-6 relative">
+<!-- Steps -->
+<div class="flex flex-col items-center gap-2 z-10">
+<div class="w-16 h-16 rounded-full bg-primary text-white flex items-center justify-center text-xl font-bold shadow-lg shadow-primary/30">1</div>
+<p class="text-sm font-semibold text-center">А = Б</p>
+</div>
+<div class="hidden md:block flex-1 h-1 bg-primary/20 relative">
+<div class="absolute inset-0 bg-primary w-full animate-pulse opacity-20"></div>
+</div>
+<div class="flex flex-col items-center gap-2 z-10">
+<div class="w-16 h-16 rounded-full bg-primary text-white flex items-center justify-center text-xl font-bold shadow-lg shadow-primary/30">2</div>
+<p class="text-sm font-semibold text-center">Б = В</p>
+</div>
+<div class="hidden md:block flex-1 h-1 bg-primary/20"></div>
+<div class="flex flex-col items-center gap-2 z-10">
+<div class="w-16 h-16 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xl font-bold shadow-lg shadow-emerald-500/30">3</div>
+<p class="text-sm font-semibold text-center">А = В</p>
+</div>
+<div class="hidden md:block flex-1 h-1 bg-emerald-500/20"></div>
+<div class="flex flex-col items-center gap-2 z-10">
+<div class="bg-amber-100 dark:bg-amber-900/30 border border-amber-500 px-4 py-3 rounded-lg text-amber-700 dark:text-amber-400 font-bold animate-bounce">
+                            Это транзитивность!
+                        </div>
+</div>
+</div>
+<div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6 text-center text-sm">
+<div class="p-4 bg-white dark:bg-slate-800 rounded-lg shadow-sm">Стимул А связан с Б (например, фото и слово)</div>
+<div class="p-4 bg-white dark:bg-slate-800 rounded-lg shadow-sm">Стимул Б связан с В (слово и предмет)</div>
+<div class="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg shadow-sm font-medium">Ребенок связывает А и В автоматически</div>
+</div>
+</div>
+</section>
+<!-- Section 5: Simulator Integration -->
+<section class="space-y-6">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">smartphone</span>
+<h3 class="text-2xl font-bold">Работа в приложении</h3>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center bg-white dark:bg-slate-900 p-6 md:p-10 rounded-2xl border border-slate-200 dark:border-slate-800">
+<div class="flex justify-center gap-4">
+<div class="w-56 h-[400px] bg-slate-800 rounded-[2.5rem] p-3 border-4 border-slate-700 shadow-2xl overflow-hidden relative">
+<div class="absolute top-1 left-1/2 -translate-x-1/2 w-20 h-5 bg-slate-800 rounded-full z-20"></div>
+<div class="bg-white h-full rounded-[2rem] overflow-hidden flex flex-col p-4">
+<div class="h-8 w-full bg-primary/10 rounded mb-4"></div>
+<div class="grid grid-cols-2 gap-2 mb-4">
+<div class="aspect-square bg-slate-100 rounded-lg border-2 border-dashed border-primary/30 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary/40">image</span>
+</div>
+<div class="aspect-square bg-slate-100 rounded-lg border-2 border-dashed border-primary/30 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary/40">image</span>
+</div>
+</div>
+<div class="h-24 w-full bg-primary rounded-xl flex items-center justify-center text-white">
+<span class="material-symbols-outlined text-3xl">touch_app</span>
+</div>
+</div>
+</div>
+<div class="hidden sm:block w-56 h-[400px] bg-slate-800 rounded-[2.5rem] p-3 border-4 border-slate-700 shadow-2xl overflow-hidden mt-8">
+<div class="bg-primary/90 h-full rounded-[2rem] flex items-center justify-center p-6 text-center text-white">
+<div>
+<span class="material-symbols-outlined text-6xl mb-4">stars</span>
+<h4 class="font-bold">Уровень пройден!</h4>
+<p class="text-sm opacity-80">Прогресс +15%</p>
+</div>
+</div>
+</div>
+</div>
+<div class="space-y-4">
+<h4 class="text-xl font-bold text-primary">Мобильный тренажер</h4>
+<p class="text-slate-600 dark:text-slate-400">Используйте AutismSkillForge для закрепления навыка. Приложение автоматически подбирает уровень сложности на основе ответов ребенка.</p>
+<ul class="space-y-2">
+<li class="flex items-center gap-2 text-sm font-medium">
+<span class="material-symbols-outlined text-emerald-500 text-lg">check_circle</span>
+                            Сортировка по категориям
+                        </li>
+<li class="flex items-center gap-2 text-sm font-medium">
+<span class="material-symbols-outlined text-emerald-500 text-lg">check_circle</span>
+                            Голосовое сопровождение
+                        </li>
+<li class="flex items-center gap-2 text-sm font-medium">
+<span class="material-symbols-outlined text-emerald-500 text-lg">check_circle</span>
+                            Отчеты для родителей
+                        </li>
+</ul>
+</div>
+</div>
+</section>
+<!-- Section 6: Mini-Test -->
+<section class="space-y-6">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">quiz</span>
+<h3 class="text-2xl font-bold">Мини-тест</h3>
+</div>
+<div class="bg-white dark:bg-slate-900 p-8 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-8">
+<div>
+<h4 class="text-lg font-bold mb-4">Вопрос 1: Что произойдет, если ребенок выучил (Фото = Мама) и (Мама = Мама звучит)?</h4>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<button class="text-left p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-primary hover:bg-primary/5 transition-all font-medium">
+                            А. Он забудет первое правило
+                        </button>
+<button class="text-left p-4 rounded-lg border-2 border-primary bg-primary/5 transition-all font-medium flex items-center justify-between">
+                            Б. Он свяжет Фото и Звук без обучения
+                            <span class="material-symbols-outlined text-primary">check_circle</span>
+</button>
+<button class="text-left p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-primary hover:bg-primary/5 transition-all font-medium">
+                            В. Обучение прекратится
+                        </button>
+<button class="text-left p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-primary hover:bg-primary/5 transition-all font-medium">
+                            Г. Нужны новые карточки
+                        </button>
+</div>
+</div>
+<div class="p-4 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-200 rounded-lg flex gap-3 border border-emerald-200 dark:border-emerald-800">
+<span class="material-symbols-outlined">info</span>
+<p class="text-sm"><b>Правильно!</b> Это и есть принцип эквивалентности стимулов, который мы развиваем.</p>
+</div>
+<div class="space-y-4">
+<h4 class="text-lg font-bold">Задание: Расставьте этапы обучения в правильном порядке</h4>
+<div class="flex flex-col gap-2">
+<div class="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-800 rounded-lg border-2 border-dashed border-slate-200 dark:border-slate-700 cursor-move hover:bg-slate-100 transition-colors">
+<span class="material-symbols-outlined text-slate-400">drag_indicator</span>
+<span class="font-medium">Стимульный контроль (А=Б)</span>
+</div>
+<div class="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-800 rounded-lg border-2 border-dashed border-slate-200 dark:border-slate-700 cursor-move hover:bg-slate-100 transition-colors">
+<span class="material-symbols-outlined text-slate-400">drag_indicator</span>
+<span class="font-medium">Обобщение в среде</span>
+</div>
+<div class="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-800 rounded-lg border-2 border-dashed border-slate-200 dark:border-slate-700 cursor-move hover:bg-slate-100 transition-colors">
+<span class="material-symbols-outlined text-slate-400">drag_indicator</span>
+<span class="font-medium">Формирование реакции выбора</span>
+</div>
+</div>
+<div class="flex justify-center mt-4">
+<p class="text-xs text-slate-500 uppercase tracking-widest font-bold">Перетащите блоки для сортировки</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 7: Training Protocol (Expandable) -->
+<section class="space-y-6 pb-20">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">rule</span>
+<h3 class="text-2xl font-bold">Протокол тренинга</h3>
+</div>
+<div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+<!-- Step 1 (Open) -->
+<div class="border-b border-slate-100 dark:border-slate-800">
+<button class="w-full flex items-center justify-between p-5 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+<div class="flex items-center gap-4">
+<span class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">01</span>
+<span class="font-semibold text-slate-700 dark:text-slate-200 text-left">Подготовка рабочего места и стимулов</span>
+</div>
+<span class="material-symbols-outlined transition-transform rotate-180">expand_more</span>
+</button>
+<div class="px-12 pb-5 text-sm text-slate-600 dark:text-slate-400">
+                        Уберите все отвлекающие факторы. Подготовьте 3 знакомых предмета и 3 соответствующих картинки.
+                    </div>
+</div>
+<!-- Step 2 -->
+<div class="border-b border-slate-100 dark:border-slate-800">
+<button class="w-full flex items-center justify-between p-5 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+<div class="flex items-center gap-4">
+<span class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 flex items-center justify-center font-bold text-sm">02</span>
+<span class="font-semibold text-slate-700 dark:text-slate-200 text-left">Установление контакта</span>
+</div>
+<span class="material-symbols-outlined">expand_more</span>
+</button>
+</div>
+<!-- Steps 3-8 (Collapsed placeholders) -->
+<div class="border-b border-slate-100 dark:border-slate-800">
+<button class="w-full flex items-center justify-between p-5 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+<div class="flex items-center gap-4">
+<span class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 flex items-center justify-center font-bold text-sm">03</span>
+<span class="font-semibold text-slate-700 dark:text-slate-200 text-left">Презентация базового стимула</span>
+</div>
+<span class="material-symbols-outlined">expand_more</span>
+</button>
+</div>
+<div class="border-b border-slate-100 dark:border-slate-800">
+<button class="w-full flex items-center justify-between p-5 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+<div class="flex items-center gap-4">
+<span class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 flex items-center justify-center font-bold text-sm">04</span>
+<span class="font-semibold text-slate-700 dark:text-slate-200 text-left">Использование подсказок (Prompting)</span>
+</div>
+<span class="material-symbols-outlined">expand_more</span>
+</button>
+</div>
+<div class="border-b border-slate-100 dark:border-slate-800">
+<button class="w-full flex items-center justify-between p-5 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+<div class="flex items-center gap-4">
+<span class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 flex items-center justify-center font-bold text-sm">05</span>
+<span class="font-semibold text-slate-700 dark:text-slate-200 text-left">Угасание подсказок</span>
+</div>
+<span class="material-symbols-outlined">expand_more</span>
+</button>
+</div>
+<div class="border-b border-slate-100 dark:border-slate-800">
+<button class="w-full flex items-center justify-between p-5 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+<div class="flex items-center gap-4">
+<span class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 flex items-center justify-center font-bold text-sm">06</span>
+<span class="font-semibold text-slate-700 dark:text-slate-200 text-left">Сбор данных</span>
+</div>
+<span class="material-symbols-outlined">expand_more</span>
+</button>
+</div>
+<div class="border-b border-slate-100 dark:border-slate-800">
+<button class="w-full flex items-center justify-between p-5 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+<div class="flex items-center gap-4">
+<span class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 flex items-center justify-center font-bold text-sm">07</span>
+<span class="font-semibold text-slate-700 dark:text-slate-200 text-left">Проверка на транзитивность</span>
+</div>
+<span class="material-symbols-outlined">expand_more</span>
+</button>
+</div>
+<div>
+<button class="w-full flex items-center justify-between p-5 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+<div class="flex items-center gap-4">
+<span class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 flex items-center justify-center font-bold text-sm">08</span>
+<span class="font-semibold text-slate-700 dark:text-slate-200 text-left">Завершение сессии и поощрение</span>
+</div>
+<span class="material-symbols-outlined">expand_more</span>
+</button>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer Progress Navigation -->
+<footer class="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 px-6 py-4 z-50">
+<div class="max-w-5xl mx-auto flex items-center justify-between">
+<div class="hidden md:flex flex-col">
+<span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Прогресс урока</span>
+<div class="w-48 h-2 bg-slate-100 dark:bg-slate-800 rounded-full mt-1 overflow-hidden">
+<div class="bg-primary h-full w-2/3"></div>
+</div>
+</div>
+<div class="flex gap-4 w-full md:w-auto">
+<button class="flex-1 md:flex-none px-6 py-2 border border-slate-200 dark:border-slate-700 rounded-lg font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">Назад</button>
+<button class="flex-1 md:flex-none px-6 py-2 bg-primary text-white rounded-lg font-bold hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">Продолжить</button>
+</div>
+</div>
+</footer>
+</div>
+</body></html>
