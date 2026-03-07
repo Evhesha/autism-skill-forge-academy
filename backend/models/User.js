@@ -1,16 +1,13 @@
+// models/User.js
 const { DataTypes } = require('sequelize');
 const bcrypt = require('bcrypt');
 
 module.exports = (sequelize) => {
   const User = sequelize.define('User', {
     id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
-      autoIncrement: true,
-    },
-    name: {
-      type: DataTypes.STRING(100),
-      allowNull: false,
     },
     email: {
       type: DataTypes.STRING(100),
@@ -20,21 +17,25 @@ module.exports = (sequelize) => {
         isEmail: true,
       },
     },
-    password: {
+    passwordHash: {
       type: DataTypes.STRING,
       allowNull: false,
+      field: 'password_hash',
     },
-    role_id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      defaultValue: 1,
-      validate: {
-        isIn: [[1, 2]],
-      },
+    isSubscribed: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+      field: 'is_subscribed',
     },
-    tenant_id: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
+    subscriptionTier: {
+      type: DataTypes.ENUM('free', 'premium'),
+      defaultValue: 'free',
+      field: 'subscription_tier',
+    },
+    createdAt: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
+      field: 'created_at',
     },
   }, {
     tableName: 'users',
@@ -42,15 +43,15 @@ module.exports = (sequelize) => {
     underscored: true,
     hooks: {
       beforeCreate: async (user) => {
-        if (user.password) {
+        if (user.passwordHash) {
           const salt = await bcrypt.genSalt(10);
-          user.password = await bcrypt.hash(user.password, salt);
+          user.passwordHash = await bcrypt.hash(user.passwordHash, salt);
         }
       },
       beforeUpdate: async (user) => {
-        if (user.changed('password')) {
+        if (user.changed('passwordHash')) {
           const salt = await bcrypt.genSalt(10);
-          user.password = await bcrypt.hash(user.password, salt);
+          user.passwordHash = await bcrypt.hash(user.passwordHash, salt);
         }
       },
     },
@@ -58,12 +59,7 @@ module.exports = (sequelize) => {
 
   // Метод проверки пароля
   User.prototype.comparePassword = async function(candidatePassword) {
-    return await bcrypt.compare(candidatePassword, this.password);
-  };
-
-  // Ассоциации
-  User.associate = function(models) {
-    User.belongsTo(models.Tenant, { foreignKey: 'tenant_id' });
+    return await bcrypt.compare(candidatePassword, this.passwordHash);
   };
 
   return User;

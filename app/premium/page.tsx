@@ -1,0 +1,19 @@
+import Link from "next/link";
+import { ChevronLeft } from "lucide-react";
+import { PremiumAccessFlow } from "@/components/PremiumAccessFlow";
+
+export default function PremiumPage() {
+  return (
+    <main className="min-h-screen bg-slate-50">
+      <div className="mx-auto w-full max-w-6xl px-4 pt-6">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-900"
+        >
+          <ChevronLeft size={16} /> На главную
+        </Link>
+      </div>
+      <PremiumAccessFlow />
+    </main>
+  );
+}

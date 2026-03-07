@@ -6,6 +6,7 @@ import {
   ChevronRight,
   Lightbulb,
   TrendingUp,
+  User,
 } from "lucide-react";
 import { lessons } from "@/constants/lessons";
 
@@ -52,7 +53,13 @@ export default function HomePage() {
             <button className="rounded-full p-2 text-slate-600 hover:bg-slate-100">
               <Bell size={18} />
             </button>
-            <div className="h-10 w-10 rounded-full border-2 border-blue-200 bg-slate-300" />
+            <Link
+              href="/profile"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border-2 border-blue-200 bg-slate-100 text-slate-600 transition hover:bg-slate-200"
+              aria-label="Профиль"
+            >
+              <User size={18} />
+            </Link>
           </div>
         </div>
       </header>
@@ -183,6 +190,15 @@ export default function HomePage() {
                 <div className="h-full w-[85%] rounded-full bg-emerald-500" />
               </div>
             </article>
+          </section>
+
+          <section className="mt-8 rounded-xl border border-blue-200 bg-blue-50 p-5">
+            <p className="text-sm text-slate-700">
+              Часть контента доступна только в Premium.
+            </p>
+            <Link href="/premium" className="mt-2 inline-block text-sm font-semibold text-blue-700 hover:underline">
+              Открыть премиум-модалку
+            </Link>
           </section>
         </main>
       </div>
