@@ -7,6 +7,38 @@ type Props = {
   screen: LessonScreen;
 };
 
+function getYouTubeEmbedUrl(videoUrl: string): string | null {
+  try {
+    const url = new URL(videoUrl);
+    const host = url.hostname.replace(/^www\./, "");
+
+    if (host === "youtu.be") {
+      const id = url.pathname.split("/").filter(Boolean)[0];
+      return id ? `https://www.youtube.com/embed/${id}` : null;
+    }
+
+    if (host === "youtube.com" || host === "m.youtube.com") {
+      if (url.pathname.startsWith("/shorts/")) {
+        const id = url.pathname.split("/")[2];
+        return id ? `https://www.youtube.com/embed/${id}` : null;
+      }
+
+      if (url.pathname === "/watch") {
+        const id = url.searchParams.get("v");
+        return id ? `https://www.youtube.com/embed/${id}` : null;
+      }
+
+      if (url.pathname.startsWith("/embed/")) {
+        return videoUrl;
+      }
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+}
+
 export function LessonScreenRenderer({ screen }: Props) {
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [showCaptions, setShowCaptions] = useState(true);
@@ -20,8 +52,32 @@ export function LessonScreenRenderer({ screen }: Props) {
     return Math.round((done / values.length) * 100);
   }, [checked]);
 
+  const checkedCount = useMemo(
+    () => Object.values(checked).filter(Boolean).length,
+    [checked],
+  );
+
+  const embeddedVideoUrl = useMemo(
+    () => (screen.type === "video" ? getYouTubeEmbedUrl(screen.videoUrl) : null),
+    [screen],
+  );
+
   switch (screen.type) {
     case "checklist": {
+      const activeFeedback = screen.feedback
+        ?.slice()
+        .sort((left, right) => right.minChecked - left.minChecked)
+        .find((item) => checkedCount >= item.minChecked);
+
+      const feedbackStyles = activeFeedback
+        ? {
+            success: "border-emerald-300 bg-emerald-50 text-emerald-900",
+            warning: "border-amber-300 bg-amber-50 text-amber-900",
+            danger: "border-rose-300 bg-rose-50 text-rose-900",
+            info: "border-cyan-300 bg-cyan-50 text-cyan-900",
+          }[activeFeedback.tone]
+        : null;
+
       return (
         <section className="space-y-4">
           <div>
@@ -50,7 +106,7 @@ export function LessonScreenRenderer({ screen }: Props) {
             })}
             <div className="pt-2">
               <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                Checklist progress: {checklistProgress}%
+                Checklist progress: {checklistProgress}% ({checkedCount}/{screen.items.length})
               </p>
               <div className="h-2 w-full rounded-full bg-slate-200">
                 <div
@@ -59,6 +115,13 @@ export function LessonScreenRenderer({ screen }: Props) {
                 />
               </div>
             </div>
+
+            {activeFeedback && (
+              <div className={`rounded-xl border px-4 py-3 text-sm ${feedbackStyles}`}>
+                <p className="font-semibold">{activeFeedback.title}</p>
+                <p className="mt-1">{activeFeedback.message}</p>
+              </div>
+            )}
           </div>
         </section>
       );
@@ -73,10 +136,32 @@ export function LessonScreenRenderer({ screen }: Props) {
           </div>
 
           <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-950">
-            <video controls className="aspect-video w-full" src={screen.videoUrl}>
-              Ваш браузер не поддерживает видео.
-            </video>
+            {embeddedVideoUrl ? (
+              <iframe
+                className="aspect-video w-full"
+                src={embeddedVideoUrl}
+                title={screen.title}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerPolicy="strict-origin-when-cross-origin"
+                allowFullScreen
+              />
+            ) : (
+              <video controls className="aspect-video w-full" src={screen.videoUrl}>
+                Ваш браузер не поддерживает видео.
+              </video>
+            )}
           </div>
+
+          {embeddedVideoUrl && (
+            <a
+              href={screen.videoUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+            >
+              Открыть в YouTube
+            </a>
+          )}
 
           <button
             type="button"

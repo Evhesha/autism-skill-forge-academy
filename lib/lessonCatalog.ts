@@ -2,7 +2,7 @@ import "server-only";
 
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
-import { type Lesson, type LessonScreen, type QuizQuestion } from "@/constants/lessons";
+import { type ChecklistFeedback, type Lesson, type LessonScreen, type QuizQuestion } from "@/constants/lessons";
 
 const LESSONS_DIR = path.join(process.cwd(), "lessons");
 
@@ -24,6 +24,16 @@ function isQuizQuestion(value: unknown): value is QuizQuestion {
   );
 }
 
+function isChecklistFeedback(value: unknown): value is ChecklistFeedback {
+  return (
+    isObject(value) &&
+    typeof value.minChecked === "number" &&
+    typeof value.title === "string" &&
+    typeof value.message === "string" &&
+    (value.tone === "success" || value.tone === "warning" || value.tone === "danger" || value.tone === "info")
+  );
+}
+
 function isLessonScreen(value: unknown): value is LessonScreen {
   if (!isObject(value) || typeof value.id !== "string" || typeof value.type !== "string" || typeof value.title !== "string") {
     return false;
@@ -35,7 +45,12 @@ function isLessonScreen(value: unknown): value is LessonScreen {
 
   switch (value.type) {
     case "checklist":
-      return isStringArray(value.items);
+      return (
+        isStringArray(value.items) &&
+        (!("feedback" in value) ||
+          value.feedback === undefined ||
+          (Array.isArray(value.feedback) && value.feedback.every(isChecklistFeedback)))
+      );
     case "video":
       return typeof value.videoUrl === "string" && isStringArray(value.captions);
     case "quiz":

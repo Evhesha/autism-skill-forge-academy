@@ -7,6 +7,13 @@ export type QuizQuestion = {
   explanation: string;
 };
 
+export type ChecklistFeedback = {
+  minChecked: number;
+  title: string;
+  message: string;
+  tone: "success" | "warning" | "danger" | "info";
+};
+
 export type LessonScreen =
   | {
       id: string;
@@ -14,6 +21,7 @@ export type LessonScreen =
       title: string;
       subtitle?: string;
       items: string[];
+      feedback?: ChecklistFeedback[];
     }
   | {
       id: string;
