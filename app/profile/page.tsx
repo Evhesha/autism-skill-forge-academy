@@ -1,10 +1,10 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   BarChart3,
-  Bell,
   BookOpen,
   CheckCircle2,
   ChevronRight,
@@ -18,15 +18,87 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { useAuth } from "@/app/context/AuthContext";
+import type { Lesson } from "@/constants/lessons";
+import { fetchAllLessonProgress, progressToPercent, type LessonProgressRecord } from "@/lib/lessonProgress";
 
 export default function ProfilePage() {
   const router = useRouter();
   const { user, isAuthenticated, isSubscribed, logout } = useAuth();
+  const [lessons, setLessons] = useState<Lesson[]>([]);
+  const [progressMap, setProgressMap] = useState<Record<string, LessonProgressRecord>>({});
 
   const handleLogout = async () => {
     await logout();
     router.push("/auth");
   };
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    fetch("/api/lessons", { cache: "no-store" })
+      .then(async (response) => {
+        if (!response.ok) {
+          throw new Error("Не удалось загрузить уроки");
+        }
+        return response.json() as Promise<Lesson[]>;
+      })
+      .then((data) => {
+        if (isCancelled) return;
+        setLessons(data);
+      })
+      .catch(() => {
+        if (isCancelled) return;
+        setLessons([]);
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    if (!isAuthenticated) return () => { isCancelled = true; };
+
+    fetchAllLessonProgress()
+      .then((progress) => {
+        if (isCancelled) return;
+        setProgressMap(progress);
+      })
+      .catch(() => {
+        if (isCancelled) return;
+        setProgressMap({});
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [isAuthenticated]);
+
+  const lessonStats = useMemo(() => {
+    const records = lessons.map((lesson) => {
+      const progress = progressMap[lesson.id];
+      const currentStep = progress?.currentStep ?? 0;
+      const isCompleted = Boolean(progress?.isCompleted);
+      const percent = progressToPercent(currentStep, isCompleted, lesson.screens.length);
+      return {
+        lesson,
+        currentStep,
+        isCompleted,
+        percent,
+      };
+    });
+
+    const completed = records.filter((item) => item.isCompleted);
+    const inProgress = records.filter((item) => item.currentStep > 0 && !item.isCompleted);
+    const totalPercent =
+      records.length > 0
+        ? Math.round(records.reduce((acc, item) => acc + item.percent, 0) / records.length)
+        : 0;
+
+    return { records, completed, inProgress, totalPercent };
+  }, [lessons, progressMap]);
 
   if (!isAuthenticated || !user) {
     return (
@@ -135,9 +207,9 @@ export default function ProfilePage() {
               <span className="text-sm text-slate-500">Общий прогресс:</span>
               <div className="flex items-center gap-3">
                 <div className="h-2.5 w-32 overflow-hidden rounded-full bg-slate-200">
-                  <div className="h-full w-[65%] bg-emerald-600" />
+                  <div className="h-full bg-emerald-600" style={{ width: `${lessonStats.totalPercent}%` }} />
                 </div>
-                <span className="font-bold text-emerald-700">65%</span>
+                <span className="font-bold text-emerald-700">{lessonStats.totalPercent}%</span>
               </div>
             </div>
           </div>
@@ -148,9 +220,22 @@ export default function ProfilePage() {
                 <BookOpen size={16} className="text-blue-700" /> Завершенные модули
               </h3>
               <ul className="space-y-3 text-sm">
-                <li className="inline-flex items-center gap-2 text-slate-700"><CheckCircle2 size={14} className="text-emerald-600" /> Введение в коммуникацию</li>
-                <li className="inline-flex items-center gap-2 text-slate-700"><CheckCircle2 size={14} className="text-emerald-600" /> Персонажи и эмоции</li>
-                <li className="inline-flex items-center gap-2 text-slate-500"><Globe size={14} className="text-slate-300" /> Социальное взаимодействие (в процессе)</li>
+                {lessonStats.completed.length > 0 ? (
+                  lessonStats.completed.map((item) => (
+                    <li key={item.lesson.id} className="inline-flex items-center gap-2 text-slate-700">
+                      <CheckCircle2 size={14} className="text-emerald-600" /> {item.lesson.title}
+                    </li>
+                  ))
+                ) : (
+                  <li className="inline-flex items-center gap-2 text-slate-500">
+                    <Globe size={14} className="text-slate-300" /> Пока нет завершенных уроков
+                  </li>
+                )}
+                {lessonStats.inProgress.map((item) => (
+                  <li key={`in-progress-${item.lesson.id}`} className="inline-flex items-center gap-2 text-slate-500">
+                    <Globe size={14} className="text-slate-300" /> {item.lesson.title} (в процессе, {item.percent}%)
+                  </li>
+                ))}
               </ul>
             </div>
           </div>
@@ -168,7 +253,7 @@ export default function ProfilePage() {
             <a className="text-xs text-slate-500 hover:text-blue-700" href="#">Политика конфиденциальности</a>
             <a className="text-xs text-slate-500 hover:text-blue-700" href="#">Условия использования</a>
           </div>
-          <p className="text-xs text-slate-400">© 2023 Все права защищены</p>
+          <p className="text-xs text-slate-400">© 2026 Все права защищены</p>
         </div>
       </footer>
     </div>

@@ -1,25 +1,60 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Lock, Sparkles } from "lucide-react";
-import { lessons } from "@/constants/lessons";
+import type { Lesson } from "@/constants/lessons";
 import { useAuth } from "@/app/context/AuthContext";
-
-function getProgress(lessonId: string): number {
-  if (typeof window === "undefined") return 0;
-  try {
-    const raw = localStorage.getItem("asf_progress_map");
-    if (!raw) return 0;
-    const parsed = JSON.parse(raw) as Record<string, number>;
-    const value = parsed[lessonId] ?? 0;
-    return Math.max(0, Math.min(100, Math.round((value / 10) * 100)));
-  } catch {
-    return 0;
-  }
-}
+import { fetchAllLessonProgress, progressToPercent, type LessonProgressRecord } from "@/lib/lessonProgress";
 
 export default function HomePage() {
-  const { isSubscribed, user } = useAuth();
+  const { isAuthenticated, isSubscribed, user } = useAuth();
+  const [lessons, setLessons] = useState<Lesson[]>([]);
+  const [progressMap, setProgressMap] = useState<Record<string, LessonProgressRecord>>({});
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    fetch("/api/lessons", { cache: "no-store" })
+      .then(async (response) => {
+        if (!response.ok) {
+          throw new Error("Не удалось загрузить уроки");
+        }
+        return response.json() as Promise<Lesson[]>;
+      })
+      .then((data) => {
+        if (isCancelled) return;
+        setLessons(data);
+      })
+      .catch(() => {
+        if (isCancelled) return;
+        setLessons([]);
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    if (!isAuthenticated) return () => { isCancelled = true; };
+
+    fetchAllLessonProgress()
+      .then((progress) => {
+        if (isCancelled) return;
+        setProgressMap(progress);
+      })
+      .catch(() => {
+        if (isCancelled) return;
+        setProgressMap({});
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [isAuthenticated]);
 
   return (
     <div className="space-y-8">
@@ -47,7 +82,10 @@ export default function HomePage() {
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {lessons.map((lesson, index) => {
             const locked = lesson.premium && !isSubscribed;
-            const progress = getProgress(lesson.id);
+            const lessonProgress = progressMap[lesson.id];
+            const progress = lessonProgress
+              ? progressToPercent(lessonProgress.currentStep, lessonProgress.isCompleted, lesson.screens.length)
+              : 0;
 
             return (
               <Link

@@ -1,5 +1,61 @@
 const { Lesson, UserProgress } = require('../models');
 
+const defaultLessonMeta = {
+  products: {
+    title: 'Lesson 1: Products',
+    description: 'Curd -> Milk -> Fridge',
+    isFree: true,
+    order: 1,
+  },
+  characters: {
+    title: 'Lesson 2: Characters',
+    description: 'Masha -> Girl -> Armchair',
+    isFree: false,
+    order: 2,
+  },
+  situations: {
+    title: 'Lesson 3: Situations',
+    description: 'Sled -> Winter -> Scarf',
+    isFree: false,
+    order: 3,
+  },
+};
+
+function fallbackTitleFromSlug(slug) {
+  const text = String(slug || '')
+    .replace(/[-_]+/g, ' ')
+    .trim();
+
+  if (!text) {
+    return 'Untitled lesson';
+  }
+
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+async function resolveLessonBySlug(slug) {
+  const existing = await Lesson.findOne({ where: { slug } });
+  if (existing) {
+    return existing;
+  }
+
+  const meta = defaultLessonMeta[slug] || {};
+  const maxOrder = (await Lesson.max('order')) || 0;
+
+  const [lesson] = await Lesson.findOrCreate({
+    where: { slug },
+    defaults: {
+      title: meta.title || fallbackTitleFromSlug(slug),
+      description: meta.description || null,
+      isFree: Boolean(meta.isFree),
+      order: meta.order || maxOrder + 1,
+      content: [],
+    },
+  });
+
+  return lesson;
+}
+
 // Получить все уроки
 exports.getAllLessons = async (req, res) => {
   try {
@@ -25,11 +81,7 @@ exports.getLessonBySlug = async (req, res) => {
   const { slug } = req.params;
   
   try {
-    const lesson = await Lesson.findOne({ where: { slug } });
-
-    if (!lesson) {
-      return res.status(404).json({ error: 'Урок не найден' });
-    }
+    const lesson = await resolveLessonBySlug(slug);
 
     if (!lesson.isFree && !req.user.isSubscribed) {
       return res.status(403).json({ 
@@ -61,10 +113,7 @@ exports.updateProgress = async (req, res) => {
   const { currentStep, isCompleted } = req.body;
 
   try {
-    const lesson = await Lesson.findOne({ where: { slug } });
-    if (!lesson) {
-      return res.status(404).json({ error: 'Урок не найден' });
-    }
+    const lesson = await resolveLessonBySlug(slug);
 
     const [progress] = await UserProgress.findOrCreate({
       where: {
@@ -77,9 +126,13 @@ exports.updateProgress = async (req, res) => {
       }
     });
 
+    const stepFromRequest = Number(currentStep ?? progress.currentStep ?? 0);
+    const safeRequestedStep = Number.isFinite(stepFromRequest) ? Math.max(0, stepFromRequest) : progress.currentStep;
+    const nextStep = Math.max(progress.currentStep ?? 0, safeRequestedStep);
+
     await progress.update({
-      currentStep: currentStep ?? progress.currentStep,
-      isCompleted: isCompleted ?? progress.isCompleted,
+      currentStep: nextStep,
+      isCompleted: Boolean(isCompleted) || progress.isCompleted,
       lastAccessed: new Date()
     });
 
@@ -97,6 +150,7 @@ exports.getUserProgress = async (req, res) => {
       where: { userId: req.user.id },
       include: [{
         model: Lesson,
+        as: 'lesson',
         attributes: ['id', 'title', 'slug', 'order']
       }]
     });

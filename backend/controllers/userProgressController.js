@@ -4,7 +4,7 @@ exports.getMyProgress = async (req, res) => {
   try {
     const progress = await UserProgress.findAll({
       where: { userId: req.user.id },
-      include: [{ model: Lesson, attributes: ['id', 'title', 'slug', 'order'] }],
+      include: [{ model: Lesson, as: 'lesson', attributes: ['id', 'title', 'slug', 'order'] }],
       order: [['lastAccessed', 'DESC']],
     });
 
@@ -28,9 +28,13 @@ exports.upsertProgress = async (req, res) => {
       defaults: { currentStep, isCompleted, lastAccessed: new Date() },
     });
 
+    const stepFromRequest = Number(currentStep ?? progress.currentStep ?? 0);
+    const safeRequestedStep = Number.isFinite(stepFromRequest) ? Math.max(0, stepFromRequest) : progress.currentStep;
+    const nextStep = Math.max(progress.currentStep ?? 0, safeRequestedStep);
+
     await progress.update({
-      currentStep,
-      isCompleted,
+      currentStep: nextStep,
+      isCompleted: Boolean(isCompleted) || progress.isCompleted,
       lastAccessed: new Date(),
     });
 

@@ -3,56 +3,63 @@
 import { useEffect, useMemo, useState } from "react";
 import { Lock, StepBack, StepForward } from "lucide-react";
 import type { Lesson } from "@/constants/lessons";
-import { TOTAL_STEPS } from "@/constants/lessons";
 import { LessonScreenRenderer } from "@/components/LessonScreenRenderer";
 import { PaywallOverlay } from "@/components/PaywallOverlay";
 import { useAuth } from "@/app/context/AuthContext";
-
-const storageKey = "asf_progress_map";
+import { fetchLessonProgress, saveLessonProgress } from "@/lib/lessonProgress";
 
 type Props = {
   lesson: Lesson;
 };
 
-function readProgress(lessonId: string): number {
-  if (typeof window === "undefined") return 1;
-  try {
-    const raw = localStorage.getItem(storageKey);
-    if (!raw) return 1;
-    const parsed = JSON.parse(raw) as Record<string, number>;
-    const step = parsed[lessonId] ?? 1;
-    return Math.max(1, Math.min(TOTAL_STEPS, step));
-  } catch {
-    return 1;
-  }
-}
-
-function writeProgress(lessonId: string, step: number) {
-  if (typeof window === "undefined") return;
-  try {
-    const raw = localStorage.getItem(storageKey);
-    const parsed = raw ? (JSON.parse(raw) as Record<string, number>) : {};
-    const prev = parsed[lessonId] ?? 1;
-    parsed[lessonId] = Math.max(prev, step);
-    localStorage.setItem(storageKey, JSON.stringify(parsed));
-  } catch {
-    // ignore storage errors
-  }
-}
-
 export function InteractiveLessonEngine({ lesson }: Props) {
-  const { isSubscribed } = useAuth();
+  const { isAuthenticated, isSubscribed } = useAuth();
   const locked = lesson.premium && !isSubscribed;
-
-  const [currentStep, setCurrentStep] = useState(() => readProgress(lesson.id));
+  const totalSteps = Math.max(1, lesson.screens.length);
+  const [currentStep, setCurrentStep] = useState(1);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const effectiveStep = isAuthenticated ? currentStep : 1;
+  const effectiveLoaded = isAuthenticated ? isLoaded : true;
 
   useEffect(() => {
-    writeProgress(lesson.id, currentStep);
-  }, [lesson.id, currentStep]);
+    let isCancelled = false;
+
+    if (!isAuthenticated) return () => { isCancelled = true; };
+
+    fetchLessonProgress(lesson.id)
+      .then((progress) => {
+        if (isCancelled) return;
+        const step = progress?.currentStep ?? 0;
+        setCurrentStep(Math.max(1, Math.min(totalSteps, step || 1)));
+      })
+      .catch(() => {
+        if (isCancelled) return;
+        setCurrentStep(1);
+      })
+      .finally(() => {
+        if (!isCancelled) {
+          setIsLoaded(true);
+        }
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [isAuthenticated, lesson.id, totalSteps]);
+
+  useEffect(() => {
+    if (!isLoaded || !isAuthenticated || locked) {
+      return;
+    }
+
+    void saveLessonProgress(lesson.id, currentStep, totalSteps).catch((error) => {
+      console.error("Failed to persist lesson progress:", error);
+    });
+  }, [currentStep, isAuthenticated, isLoaded, lesson.id, locked, totalSteps]);
 
   const activeScreen = useMemo(
-    () => lesson.screens[Math.max(0, Math.min(lesson.screens.length - 1, currentStep - 1))],
-    [lesson.screens, currentStep],
+    () => lesson.screens[Math.max(0, Math.min(lesson.screens.length - 1, effectiveStep - 1))],
+    [lesson.screens, effectiveStep],
   );
 
   return (
@@ -66,7 +73,7 @@ export function InteractiveLessonEngine({ lesson }: Props) {
       <div className="relative">
         <div className={`space-y-4 rounded-3xl border border-slate-200 bg-slate-50 p-4 md:p-6 ${locked ? "blur-sm" : ""}`}>
           <div className="flex items-center justify-between">
-            <p className="text-sm font-semibold text-slate-600">Step {currentStep} / {TOTAL_STEPS}</p>
+            <p className="text-sm font-semibold text-slate-600">Step {effectiveStep} / {totalSteps}</p>
             {lesson.premium && (
               <p className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-1 text-xs font-bold text-amber-700">
                 <Lock size={12} /> Premium lesson
@@ -77,7 +84,7 @@ export function InteractiveLessonEngine({ lesson }: Props) {
           <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200">
             <div
               className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 transition-all duration-300"
-              style={{ width: `${(currentStep / TOTAL_STEPS) * 100}%` }}
+              style={{ width: `${(effectiveStep / totalSteps) * 100}%` }}
             />
           </div>
 
@@ -89,7 +96,7 @@ export function InteractiveLessonEngine({ lesson }: Props) {
             <button
               type="button"
               onClick={() => setCurrentStep((value) => Math.max(1, value - 1))}
-              disabled={currentStep === 1}
+              disabled={effectiveStep === 1 || !effectiveLoaded}
               className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 disabled:cursor-not-allowed disabled:opacity-45"
             >
               <StepBack size={16} /> Previous
@@ -97,8 +104,8 @@ export function InteractiveLessonEngine({ lesson }: Props) {
 
             <button
               type="button"
-              onClick={() => setCurrentStep((value) => Math.min(TOTAL_STEPS, value + 1))}
-              disabled={currentStep === TOTAL_STEPS}
+              onClick={() => setCurrentStep((value) => Math.min(totalSteps, value + 1))}
+              disabled={effectiveStep === totalSteps || !effectiveLoaded}
               className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-45"
             >
               Next <StepForward size={16} />

@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
-import { getLessonById } from "@/constants/lessons";
+import { getLessonById } from "@/lib/lessonCatalog";
 import { InteractiveLessonEngine } from "@/components/InteractiveLessonEngine";
+
+export const dynamic = "force-dynamic";
 
 type LessonPageProps = {
   params: Promise<{ id: string }>;
@@ -8,7 +10,7 @@ type LessonPageProps = {
 
 export default async function LessonPage({ params }: LessonPageProps) {
   const { id } = await params;
-  const lesson = getLessonById(id);
+  const lesson = await getLessonById(id);
 
   if (!lesson) {
     notFound();

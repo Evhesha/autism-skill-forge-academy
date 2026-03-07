@@ -7,6 +7,7 @@ import { BrainCircuit, LayoutDashboard, UserRound } from "lucide-react";
 const navItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
   { href: "/profile", label: "Profile", icon: UserRound },
+  { href: "/auth", label: "Login", icon: UserRound },
 ];
 
 export function AppHeader() {
@@ -19,6 +20,7 @@ export function AppHeader() {
           <BrainCircuit size={18} />
           <span className="text-sm font-bold tracking-wide">AutismSkillForge</span>
         </Link>
+        
 
         <nav className="flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 p-1">
           {navItems.map(({ href, label, icon: Icon }) => {
