@@ -16,21 +16,38 @@ import {
   Pencil,
   Settings,
   ShieldCheck,
-  Sparkles,
-  Star,
-  Timer,
-  Trophy,
 } from "lucide-react";
 import { useAuth } from "@/app/context/AuthContext";
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { logout } = useAuth();
+  const { user, isAuthenticated, isSubscribed, logout } = useAuth();
 
   const handleLogout = async () => {
     await logout();
     router.push("/auth");
   };
+
+  if (!isAuthenticated || !user) {
+    return (
+      <div className="min-h-screen bg-slate-50 text-slate-900">
+        <main className="mx-auto w-full max-w-5xl px-4 py-8">
+          <section className="rounded-xl border border-slate-100 bg-white p-8">
+            <h1 className="text-2xl font-bold">Профиль недоступен</h1>
+            <p className="mt-2 text-slate-600">Войдите или зарегистрируйтесь, чтобы открыть настройки аккаунта.</p>
+            <div className="mt-6 flex gap-3">
+              <Link href="/auth" className="rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-bold text-white hover:bg-blue-800">
+                Войти
+              </Link>
+              <Link href="/auth" className="rounded-lg border border-slate-300 px-5 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50">
+                Зарегистрироваться
+              </Link>
+            </div>
+          </section>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
@@ -40,8 +57,8 @@ export default function ProfilePage() {
             <div className="h-32 w-32 rounded-full bg-[url('https://lh3.googleusercontent.com/aida-public/AB6AXuAaQRkXzeyjlakjQwwd4RoCBUKoWo5WWV9lS9JFkhzD3zRWlrSzEuEQjHG7X4Aq8uDZ0sDzT05fxIS8Ck2Gu9veDn6BM1Rb4KkB3_cq9qHDKokTAa10L5I-eq3-QMaroTW86tq9F6P39OidB6LF-VQta_YE2jpa1QnPBRb9Evu2ntmE4Q4cBv0kOs1ZBPUu8dM6J_I8bmC89fsUviNrl2mMN1Hn9q08_n8PmNhCoQulNzr7z8rCIQ3wCZGkhv0RC4BtsyDnvl0Y44Dq')] bg-cover bg-center ring-4 ring-blue-100" />
 
             <div className="text-center md:text-left">
-              <h1 className="text-3xl font-bold">Иван Иванов</h1>
-              <p className="text-lg text-slate-500">ivan.ivanov@email.com</p>
+              <h1 className="text-3xl font-bold">{user.name}</h1>
+              <p className="text-lg text-slate-500">{user.email}</p>
             </div>
           </div>
 
@@ -60,21 +77,29 @@ export default function ProfilePage() {
             <div className="space-y-3">
               <div className="flex items-center justify-between rounded-lg bg-slate-50 p-4">
                 <span className="text-slate-600">Статус</span>
-                <span className="inline-flex items-center gap-1 font-bold text-emerald-700"><CheckCircle2 size={16} /> Активен</span>
+                <span className={`inline-flex items-center gap-1 font-bold ${isSubscribed ? "text-emerald-700" : "text-slate-600"}`}>
+                  {isSubscribed ? <CheckCircle2 size={16} /> : null} {isSubscribed ? "Активен" : "Не активен"}
+                </span>
               </div>
               <div className="flex items-center justify-between rounded-lg bg-slate-50 p-4">
                 <span className="text-slate-600">Тариф</span>
-                <span className="font-bold">Профессиональный (Pro)</span>
+                <span className="font-bold">{isSubscribed ? "Premium" : "Free"}</span>
               </div>
               <div className="flex items-center justify-between rounded-lg bg-slate-50 p-4">
                 <span className="text-slate-600">Следующее списание</span>
-                <span className="font-bold">15 октября 2023</span>
+                <span className="font-bold">{isSubscribed ? "По графику платежей" : "—"}</span>
               </div>
             </div>
 
-            <Link href="/premium" className="mt-5 inline-flex w-full items-center justify-center rounded-lg border-2 border-blue-200 py-2.5 text-sm font-bold text-blue-700 hover:bg-blue-50">
-              Управление подпиской
-            </Link>
+            {isSubscribed ? (
+              <Link href="/premium" className="mt-5 inline-flex w-full items-center justify-center rounded-lg border-2 border-blue-200 py-2.5 text-sm font-bold text-blue-700 hover:bg-blue-50">
+                Управление подпиской
+              </Link>
+            ) : (
+              <Link href="/premium" className="mt-5 inline-flex w-full items-center justify-center rounded-lg bg-blue-700 py-2.5 text-sm font-bold text-white hover:bg-blue-800">
+                Оплатить подписку
+              </Link>
+            )}
           </section>
 
           <section className="rounded-xl border border-slate-100 bg-white p-6">
@@ -89,17 +114,10 @@ export default function ProfilePage() {
                 <ChevronRight size={16} className="text-slate-300" />
               </button>
               <button className="flex w-full items-center justify-between rounded-lg p-3 hover:bg-slate-50">
-                <span className="inline-flex items-center gap-3 text-sm font-medium"><Bell size={16} className="text-slate-400" /> Уведомления</span>
-                <ChevronRight size={16} className="text-slate-300" />
-              </button>
-              <button className="flex w-full items-center justify-between rounded-lg p-3 hover:bg-slate-50">
                 <span className="inline-flex items-center gap-3 text-sm font-medium"><Languages size={16} className="text-slate-400" /> Язык интерфейса</span>
                 <span className="text-sm text-slate-400">Русский</span>
               </button>
-              <button
-                onClick={handleLogout}
-                className="mt-2 flex w-full items-center justify-between rounded-lg p-3 text-red-600 hover:bg-red-50"
-              >
+              <button onClick={handleLogout} className="mt-2 flex w-full items-center justify-between rounded-lg p-3 text-red-600 hover:bg-red-50">
                 <span className="inline-flex items-center gap-3 text-sm font-bold"><LogOut size={16} /> Выйти из системы</span>
               </button>
             </div>
