@@ -32,7 +32,6 @@ module.exports = (sequelize) => {
       field: 'current_step',
       validate: {
         min: 0,
-        max: 10,
       },
     },
     isCompleted: {

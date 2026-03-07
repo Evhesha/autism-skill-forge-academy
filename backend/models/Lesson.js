@@ -17,6 +17,10 @@ module.exports = (sequelize) => {
       allowNull: false,
       unique: true,
     },
+    description: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
     isFree: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,

@@ -9,6 +9,10 @@ module.exports = (sequelize) => {
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
+    name: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
+    },
     email: {
       type: DataTypes.STRING(100),
       allowNull: false,
@@ -17,10 +21,28 @@ module.exports = (sequelize) => {
         isEmail: true,
       },
     },
+    password: {
+      type: DataTypes.VIRTUAL,
+      set(value) {
+        this.setDataValue('password', value);
+        this.setDataValue('passwordHash', value);
+      },
+    },
     passwordHash: {
       type: DataTypes.STRING,
       allowNull: false,
       field: 'password_hash',
+    },
+    roleId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 1,
+      field: 'role_id',
+    },
+    tenantId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      field: 'tenant_id',
     },
     isSubscribed: {
       type: DataTypes.BOOLEAN,

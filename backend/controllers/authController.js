@@ -1,28 +1,34 @@
 const { User } = require('../models');
 const jwt = require('jsonwebtoken');
+
 const Role = {
   USER: 1,
-  ADMIN: 2
+  ADMIN: 2,
 };
+
+const jwtSecret = process.env.JWT_SECRET || 'dev-secret';
+
 // Регистрация
 exports.register = async (req, res) => {
   const { name, email, password } = req.body;
+
   if (!name || !email || !password) {
     return res.status(400).json({ error: 'Поля name, email и password обязательны' });
   }
+
   try {
-    const user = await User.create({ 
-      name, 
-      email, 
+    const user = await User.create({
+      name,
+      email,
       password,
-      role_id: Role.USER
+      roleId: Role.USER,
     });
-    
+
     res.status(201).json({
       id: user.id,
       name: user.name,
       email: user.email,
-      role_id: user.role_id,
+      role_id: user.roleId,
       createdAt: user.createdAt,
     });
   } catch (err) {
@@ -40,11 +46,14 @@ exports.register = async (req, res) => {
 // Вход в аккаунт
 exports.login = async (req, res) => {
   const { email, password } = req.body;
+
   if (!email || !password) {
     return res.status(400).json({ error: 'Email и пароль обязательны' });
   }
+
   try {
     const user = await User.findOne({ where: { email } });
+
     if (!user) {
       return res.status(401).json({ error: 'Неверный email или пароль' });
     }
@@ -55,8 +64,14 @@ exports.login = async (req, res) => {
     }
 
     const token = jwt.sign(
-      { id: user.id, email: user.email, role_id: user.role_id, tenant_id: user.tenant_id },
-      process.env.JWT_SECRET,
+      {
+        id: user.id,
+        email: user.email,
+        role_id: user.roleId,
+        tenant_id: user.tenantId,
+        isSubscribed: user.isSubscribed,
+      },
+      jwtSecret,
       { expiresIn: '24h' }
     );
 
@@ -75,8 +90,9 @@ exports.login = async (req, res) => {
         id: user.id,
         name: user.name,
         email: user.email,
-        role_id: user.role_id,
-      }
+        role_id: user.roleId,
+      },
+      token,
     });
   } catch (err) {
     console.error(err);

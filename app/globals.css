@@ -21,3 +21,18 @@ body {
   color: var(--foreground);
   font-family: "Segoe UI", "Arial", sans-serif;
 }
+
+@keyframes fadeSlide {
+  0% {
+    opacity: 0;
+    transform: translateX(18px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-fade-slide {
+  animation: fadeSlide 280ms ease;
+}

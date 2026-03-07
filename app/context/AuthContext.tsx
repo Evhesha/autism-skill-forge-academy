@@ -6,6 +6,7 @@ export type AuthUser = {
   id: number | string;
   name: string;
   email: string;
+  isSubscribed: boolean;
 };
 
 type LoginPayload = {
@@ -22,12 +23,13 @@ type RegisterPayload = {
 type AuthContextValue = {
   user: AuthUser | null;
   isAuthenticated: boolean;
+  isSubscribed: boolean;
   login: (payload: LoginPayload) => Promise<AuthUser>;
   register: (payload: RegisterPayload) => Promise<void>;
   logout: () => Promise<void>;
 };
 
-const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3001";
 const STORAGE_KEY = "asf_user";
 const TOKEN_KEY = "token";
 
@@ -68,6 +70,7 @@ function parseStoredUser(raw: string | null): AuthUser | null {
       id: parsed.id,
       email: parsed.email,
       name: parsed.name,
+      isSubscribed: Boolean(parsed.isSubscribed),
     };
   } catch {
     return null;
@@ -105,7 +108,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     const data = (await response.json()) as
-      | { user: { id: number | string; name: string; email: string }; token?: string }
+      | { user: { id: number | string; name: string; email: string; isSubscribed?: boolean }; token?: string }
       | { error?: string };
 
     if (!response.ok || !("user" in data)) {
@@ -116,6 +119,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       id: data.user.id,
       name: data.user.name,
       email: data.user.email,
+      isSubscribed: Boolean(data.user.isSubscribed),
     };
 
     if (typeof window !== "undefined") {
@@ -182,7 +186,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo<AuthContextValue>(
-    () => ({ user, isAuthenticated, login, register, logout }),
+    () => ({ user, isAuthenticated, isSubscribed: Boolean(user?.isSubscribed), login, register, logout }),
     [isAuthenticated, user],
   );
 
