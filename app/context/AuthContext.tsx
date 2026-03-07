@@ -7,6 +7,7 @@ export type AuthUser = {
   name: string;
   email: string;
   isSubscribed: boolean;
+  subscriptionTier?: "free" | "premium";
 };
 
 type LoginPayload = {
@@ -52,7 +53,34 @@ function hasValidToken() {
     return false;
   }
 
-  return Boolean(readCookie(TOKEN_KEY) || localStorage.getItem(TOKEN_KEY));
+  const rawToken = readCookie(TOKEN_KEY);
+  if (!rawToken) return false;
+  const payload = decodeJwtPayload(rawToken);
+  if (!payload) return false;
+  if (typeof payload.exp === "number" && payload.exp * 1000 <= Date.now()) {
+    return false;
+  }
+  return true;
+}
+
+function readStoredToken() {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  return readCookie(TOKEN_KEY);
+}
+
+function decodeJwtPayload(token: string) {
+  try {
+    const parts = token.split(".");
+    if (parts.length < 2) return null;
+    const payload = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    const decoded = atob(payload);
+    return JSON.parse(decoded) as Partial<AuthUser> & { sub?: string; exp?: number };
+  } catch {
+    return null;
+  }
 }
 
 function parseStoredUser(raw: string | null): AuthUser | null {
@@ -71,10 +99,30 @@ function parseStoredUser(raw: string | null): AuthUser | null {
       email: parsed.email,
       name: parsed.name,
       isSubscribed: Boolean(parsed.isSubscribed),
+      subscriptionTier: parsed.subscriptionTier === "premium" ? "premium" : "free",
     };
   } catch {
     return null;
   }
+}
+
+function parseUserFromToken(rawToken: string | null): AuthUser | null {
+  if (!rawToken) return null;
+  const payload = decodeJwtPayload(rawToken);
+  if (!payload?.id || !payload?.email) {
+    return null;
+  }
+  if (typeof payload.exp === "number" && payload.exp * 1000 <= Date.now()) {
+    return null;
+  }
+
+  return {
+    id: payload.id,
+    email: payload.email,
+    name: typeof payload.name === "string" ? payload.name : "User",
+    isSubscribed: Boolean(payload.isSubscribed),
+    subscriptionTier: payload.subscriptionTier === "premium" ? "premium" : "free",
+  };
 }
 
 function getInitialUser() {
@@ -86,7 +134,10 @@ function getInitialUser() {
     return null;
   }
 
-  return parseStoredUser(localStorage.getItem(STORAGE_KEY));
+  const fromStorage = parseStoredUser(localStorage.getItem(STORAGE_KEY));
+  if (fromStorage) return fromStorage;
+
+  return parseUserFromToken(readStoredToken());
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -108,7 +159,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     const data = (await response.json()) as
-      | { user: { id: number | string; name: string; email: string; isSubscribed?: boolean }; token?: string }
+      | {
+          user: {
+            id: number | string;
+            name: string;
+            email: string;
+            isSubscribed?: boolean;
+            subscriptionTier?: "free" | "premium";
+          };
+          token?: string;
+        }
       | { error?: string };
 
     if (!response.ok || !("user" in data)) {
@@ -120,13 +180,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       name: data.user.name,
       email: data.user.email,
       isSubscribed: Boolean(data.user.isSubscribed),
+      subscriptionTier: data.user.subscriptionTier === "premium" ? "premium" : "free",
     };
 
     if (typeof window !== "undefined") {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
-      if ("token" in data && typeof data.token === "string") {
-        localStorage.setItem(TOKEN_KEY, data.token);
-      }
     }
 
     setUser(normalized);
@@ -176,6 +234,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(null);
         if (typeof window !== "undefined") {
           localStorage.removeItem(STORAGE_KEY);
+          localStorage.removeItem(TOKEN_KEY);
+          document.cookie = "token=; Max-Age=0; path=/";
+        }
+      } else if (!user) {
+        const tokenUser = parseUserFromToken(readStoredToken());
+        if (tokenUser) {
+          setUser(tokenUser);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(tokenUser));
         }
       }
     };
@@ -183,7 +249,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     syncSession();
     const intervalId = window.setInterval(syncSession, 15000);
     return () => window.clearInterval(intervalId);
-  }, []);
+  }, [user]);
 
   const value = useMemo<AuthContextValue>(
     () => ({ user, isAuthenticated, isSubscribed: Boolean(user?.isSubscribed), login, register, logout }),

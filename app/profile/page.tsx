@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   BarChart3,
   Bell,
@@ -18,33 +21,19 @@ import {
   Timer,
   Trophy,
 } from "lucide-react";
+import { useAuth } from "@/app/context/AuthContext";
 
 export default function ProfilePage() {
+  const router = useRouter();
+  const { logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+    router.push("/auth");
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
-      <header className="sticky top-0 z-40 border-b border-slate-200 bg-white px-6 py-3 md:px-20">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <GraduationCap className="text-blue-700" size={24} />
-            <h2 className="text-lg font-bold tracking-tight">AutismSkillForge Academy</h2>
-          </div>
-
-          <div className="flex items-center gap-6">
-            <nav className="hidden items-center gap-6 md:flex">
-              <Link href="/" className="text-sm font-medium text-slate-700 hover:text-blue-700">Курсы</Link>
-              <p className="text-sm font-medium text-slate-500">Прогресс</p>
-              <p className="text-sm font-medium text-slate-500">Библиотека</p>
-            </nav>
-
-            <button className="rounded-lg bg-slate-100 p-2 text-slate-700">
-              <Bell size={18} />
-            </button>
-
-            <div className="h-10 w-10 rounded-full border-2 border-blue-200 bg-[url('https://lh3.googleusercontent.com/aida-public/AB6AXuC1UIc9Vc7Ar3TXOgAYAbj436jFnDXd6lHCZU0REOBIpwgt0m-TQ0t70wwhLKv4k97xQtU9UvNn6Kz_fY8fzTrhzbihsGM9qsRFoAsfB3XLBnoOhyAT0aQ2oh7FjUdVrWaVancS3IX8TMglhjqu6rkwX4UwbaU4xdZaA9QTPjVPp_iqMBvBXcwQdnAAfEQHETRLf7wNhefROX9lq7ZlxaAeruZoT-6odV8zDc9qo4eUgPwBvm7hPSQoSbxA0rXA7Ndve4ONdZVkSDGB')] bg-cover bg-center" />
-          </div>
-        </div>
-      </header>
-
       <main className="mx-auto w-full max-w-5xl px-4 py-8">
         <section className="mb-8 flex flex-col gap-8 rounded-xl border border-slate-100 bg-white p-8 md:flex-row md:items-end md:justify-between">
           <div className="flex flex-col items-center gap-4 md:flex-row md:items-end">
@@ -53,10 +42,6 @@ export default function ProfilePage() {
             <div className="text-center md:text-left">
               <h1 className="text-3xl font-bold">Иван Иванов</h1>
               <p className="text-lg text-slate-500">ivan.ivanov@email.com</p>
-              <div className="mt-3 flex justify-center gap-2 md:justify-start">
-                <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-bold uppercase tracking-wider text-blue-700">Студент</span>
-                <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold uppercase tracking-wider text-emerald-700">Pro аккаунт</span>
-              </div>
             </div>
           </div>
 
@@ -111,7 +96,10 @@ export default function ProfilePage() {
                 <span className="inline-flex items-center gap-3 text-sm font-medium"><Languages size={16} className="text-slate-400" /> Язык интерфейса</span>
                 <span className="text-sm text-slate-400">Русский</span>
               </button>
-              <button className="mt-2 flex w-full items-center justify-between rounded-lg p-3 text-red-600 hover:bg-red-50">
+              <button
+                onClick={handleLogout}
+                className="mt-2 flex w-full items-center justify-between rounded-lg p-3 text-red-600 hover:bg-red-50"
+              >
                 <span className="inline-flex items-center gap-3 text-sm font-bold"><LogOut size={16} /> Выйти из системы</span>
               </button>
             </div>
@@ -146,47 +134,6 @@ export default function ProfilePage() {
                 <li className="inline-flex items-center gap-2 text-slate-700"><CheckCircle2 size={14} className="text-emerald-600" /> Персонажи и эмоции</li>
                 <li className="inline-flex items-center gap-2 text-slate-500"><Globe size={14} className="text-slate-300" /> Социальное взаимодействие (в процессе)</li>
               </ul>
-            </div>
-
-            <div className="rounded-xl border border-slate-100 bg-slate-50 p-5">
-              <h3 className="mb-4 inline-flex items-center gap-2 font-bold">
-                <Trophy size={16} className="text-blue-700" /> Последние достижения
-              </h3>
-              <div className="flex gap-4 overflow-x-auto pb-2">
-                <div className="min-w-[80px] text-center">
-                  <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-yellow-100 text-yellow-600"><Star size={18} /></div>
-                  <p className="text-[10px] font-bold uppercase text-slate-500">Новичок</p>
-                </div>
-                <div className="min-w-[80px] text-center">
-                  <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-blue-600"><Timer size={18} /></div>
-                  <p className="text-[10px] font-bold uppercase text-slate-500">3 дня в ряд</p>
-                </div>
-                <div className="min-w-[80px] text-center">
-                  <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full border-2 border-emerald-500 bg-emerald-100 text-emerald-600"><Sparkles size={18} /></div>
-                  <p className="text-[10px] font-bold uppercase text-slate-500">Модуль 1</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="border-t border-slate-100 pt-8">
-            <h3 className="mb-4 font-bold">Мои сертификаты</h3>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              <div className="group relative aspect-[4/3] overflow-hidden rounded-lg border border-slate-200">
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 p-4 text-center">
-                  <BookOpen size={34} className="mb-2 text-slate-300" />
-                  <p className="mb-1 text-xs font-bold uppercase tracking-tight text-slate-500">Основы Forge</p>
-                  <p className="text-[10px] text-slate-400">Сентябрь 2023</p>
-                </div>
-                <div className="absolute inset-0 flex items-center justify-center bg-blue-700/90 opacity-0 transition-opacity group-hover:opacity-100">
-                  <button className="rounded bg-white px-4 py-2 text-sm font-bold text-blue-700">Скачать PDF</button>
-                </div>
-              </div>
-
-              <div className="flex aspect-[4/3] flex-col items-center justify-center rounded-lg border-2 border-dashed border-slate-200 text-slate-400">
-                <Lock size={28} className="mb-1" />
-                <span className="text-xs font-medium">Модуль 2 не завершен</span>
-              </div>
             </div>
           </div>
         </section>

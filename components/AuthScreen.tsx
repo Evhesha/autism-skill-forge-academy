@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, LogIn, UserPlus } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -10,7 +10,7 @@ type AuthMode = "login" | "register";
 
 export function AuthScreen() {
   const router = useRouter();
-  const { user, isAuthenticated, login, register } = useAuth();
+  const { login, register } = useAuth();
 
   const [mode, setMode] = useState<AuthMode>("login");
   const [name, setName] = useState("");
@@ -20,12 +20,6 @@ export function AuthScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (user && isAuthenticated) {
-      router.replace("/");
-    }
-  }, [isAuthenticated, router, user]);
 
   const clearFeedback = () => {
     setError(null);

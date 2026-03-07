@@ -1,7 +1,12 @@
 import Link from "next/link";
 import { Lock } from "lucide-react";
+import { useAuth } from "@/app/context/AuthContext";
 
 export function PaywallOverlay({ lessonTitle }: { lessonTitle: string }) {
+  const { isAuthenticated } = useAuth();
+  const ctaHref = isAuthenticated ? "/premium" : "/auth";
+  const ctaLabel = isAuthenticated ? "Перейти к оплате" : "Зарегистрироваться";
+
   return (
     <div className="absolute inset-0 z-20 flex items-center justify-center rounded-3xl bg-slate-900/35 p-4">
       <div className="max-w-md rounded-2xl border border-white/30 bg-white/95 p-6 text-center shadow-2xl backdrop-blur">
@@ -12,11 +17,14 @@ export function PaywallOverlay({ lessonTitle }: { lessonTitle: string }) {
         <p className="mt-2 text-sm text-slate-600">
           Урок <span className="font-semibold">{lessonTitle}</span> доступен только в премиум-подписке.
         </p>
+        {!isAuthenticated && (
+          <p className="mt-1 text-xs text-slate-500">Сначала регистрация, затем можно оформить Premium.</p>
+        )}
         <Link
-          href="/premium"
+          href={ctaHref}
           className="mt-4 inline-flex rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-700"
         >
-          Открыть Premium
+          {ctaLabel}
         </Link>
       </div>
     </div>

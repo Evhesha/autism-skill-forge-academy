@@ -72,7 +72,7 @@ function createScreens(baseId: string, a: string, b: string, c: string): LessonS
       type: "video",
       title: "Screen 2: Video Demonstration",
       subtitle: "Просмотрите короткий пример цепочки в действии.",
-      videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4",
+      videoUrl: "https://www.youtube.com/shorts/S1LDKjIPSCc",
       captions: [
         "Тренер показывает первую связь A -> B.",
         "Затем закрепляется связь B -> C.",
@@ -116,7 +116,7 @@ function createScreens(baseId: string, a: string, b: string, c: string): LessonS
       type: "video",
       title: "Screen 6: Context Video",
       subtitle: "Контекстное повторение с вариациями.",
-      videoUrl: "https://www.w3schools.com/html/movie.mp4",
+      videoUrl: "https://youtube.com/shorts/iKH8urXcnIU?feature=share",
       captions: [
         "Добавьте новый контекст к знакомой цепочке.",
         "Сравните правильный и ошибочный вывод.",
