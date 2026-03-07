@@ -7,7 +7,6 @@ import { BrainCircuit, LayoutDashboard, UserRound } from "lucide-react";
 const navItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
   { href: "/profile", label: "Profile", icon: UserRound },
-  { href: "/auth", label: "Login", icon: UserRound },
 ];
 
 export function AppHeader() {
@@ -21,26 +20,38 @@ export function AppHeader() {
           <span className="text-sm font-bold tracking-wide">AutismSkillForge</span>
         </Link>
         
+        <div className="flex items-center gap-2">
+          <Link
+            href="/auth"
+            className={`inline-flex items-center rounded-lg px-3 py-2 text-sm font-semibold transition ${
+              pathname === "/auth"
+                ? "text-cyan-900"
+                : "text-slate-600 hover:bg-white hover:text-slate-900"
+            }`}
+          >
+            Login
+          </Link>
 
-        <nav className="flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 p-1">
-          {navItems.map(({ href, label, icon: Icon }) => {
-            const active = pathname === href;
-            return (
-              <Link
-                key={href}
-                href={href}
-                className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition ${
-                  active
-                    ? "bg-cyan-100 text-cyan-900"
-                    : "text-slate-600 hover:bg-white hover:text-slate-900"
-                }`}
-              >
-                <Icon size={16} />
-                <span className="hidden sm:inline">{label}</span>
-              </Link>
-            );
-          })}
-        </nav>
+          <nav className="flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 p-1">
+            {navItems.map(({ href, label, icon: Icon }) => {
+              const active = pathname === href;
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition ${
+                    active
+                      ? "bg-cyan-100 text-cyan-900"
+                      : "text-slate-600 hover:bg-white hover:text-slate-900"
+                  }`}
+                >
+                  <Icon size={16} />
+                  <span className="hidden sm:inline">{label}</span>
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
       </div>
     </header>
   );
