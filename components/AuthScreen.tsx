@@ -37,6 +37,19 @@ export function AuthScreen() {
     clearFeedback();
   };
 
+  const handleLogin = async () => {
+    await login({ email, password });
+    router.push("/");
+  };
+
+  const handleRegister = async () => {
+    await register({ name, email, password });
+    setSuccess("Регистрация завершена. Теперь войдите в аккаунт.");
+    setMode("login");
+    setPassword("");
+    setConfirmPassword("");
+  };
+
   const submit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     clearFeedback();
@@ -55,14 +68,9 @@ export function AuthScreen() {
 
     try {
       if (mode === "login") {
-        await login({ email, password });
-        router.push("/");
+        await handleLogin();
       } else {
-        await register({ name, email, password });
-        setSuccess("Регистрация завершена. Теперь можно войти.");
-        setMode("login");
-        setPassword("");
-        setConfirmPassword("");
+        await handleRegister();
       }
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "Ошибка авторизации.");

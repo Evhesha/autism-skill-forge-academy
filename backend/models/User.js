@@ -31,7 +31,7 @@ module.exports = (sequelize) => {
       field: 'is_subscribed',
     },
     subscriptionTier: {
-      type: DataTypes.ENUM('free', 'premium', 'admin'),
+      type: DataTypes.ENUM('free', 'premium'),
       defaultValue: 'free',
       field: 'subscription_tier',
     },

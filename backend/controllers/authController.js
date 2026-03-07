@@ -1,11 +1,6 @@
 const { User } = require('../models');
 const jwt = require('jsonwebtoken');
 
-const Role = {
-  USER: 1,
-  ADMIN: 2,
-};
-
 const jwtSecret = process.env.JWT_SECRET || 'dev-secret';
 
 // Регистрация
@@ -20,15 +15,15 @@ exports.register = async (req, res) => {
     const user = await User.create({
       name,
       email,
-      password,
-      roleId: Role.USER,
+      passwordHash: password,
     });
 
     res.status(201).json({
       id: user.id,
       name: user.name,
       email: user.email,
-      role_id: user.roleId,
+      isSubscribed: user.isSubscribed,
+      subscriptionTier: user.subscriptionTier,
       createdAt: user.createdAt,
     });
   } catch (err) {
@@ -67,8 +62,7 @@ exports.login = async (req, res) => {
       {
         id: user.id,
         email: user.email,
-        role_id: user.roleId,
-        tenant_id: user.tenantId,
+        subscriptionTier: user.subscriptionTier,
         isSubscribed: user.isSubscribed,
       },
       jwtSecret,
@@ -90,7 +84,8 @@ exports.login = async (req, res) => {
         id: user.id,
         name: user.name,
         email: user.email,
-        role_id: user.roleId,
+        isSubscribed: user.isSubscribed,
+        subscriptionTier: user.subscriptionTier,
       },
       token,
     });

@@ -14,7 +14,7 @@
   "test": {
     "username": "postgres",
     "password": "2722",
-    "database": "autism_academy_test",
+    "database": "autism_academy_dev",
     "host": "localhost",
     "port": 5432,
     "dialect": "postgres",
@@ -26,7 +26,7 @@
   "production": {
     "username": "postgres",
     "password": "2722",
-    "database": "autism_academy_prod",
+    "database": "autism_academy_dev",
     "host": "localhost",
     "port": 5432,
     "dialect": "postgres",

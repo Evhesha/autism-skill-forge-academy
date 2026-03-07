@@ -5,26 +5,38 @@ import { usePathname } from "next/navigation";
 import { BrainCircuit, Home, Lock, UserRound } from "lucide-react";
 import { lessons } from "@/constants/lessons";
 import { useAuth } from "@/app/context/AuthContext";
-
-function lessonProgress(lessonId: string): number {
-  if (typeof window === "undefined") return 0;
-
-  try {
-    const raw = localStorage.getItem("asf_progress_map");
-    if (!raw) return 0;
-    const parsed = JSON.parse(raw) as Record<string, number>;
-    const value = parsed[lessonId] ?? 0;
-    return Math.max(0, Math.min(100, Math.round((value / 10) * 100)));
-  } catch {
-    return 0;
-  }
-}
+import { useState, useEffect } from "react";
 
 export function Sidebar() {
   const pathname = usePathname();
   const { isSubscribed } = useAuth();
+  const [progressMap, setProgressMap] = useState<Record<string, number>>({});
+  const [isMounted, setIsMounted] = useState(false);
 
-  const progressMap = Object.fromEntries(lessons.map((lesson) => [lesson.id, lessonProgress(lesson.id)]));
+  // Загружаем прогресс только на клиенте после монтирования
+  useEffect(() => {
+    setIsMounted(true);
+    
+    const loadProgress = () => {
+      try {
+        const raw = localStorage.getItem("asf_progress_map");
+        if (!raw) return;
+        
+        const parsed = JSON.parse(raw) as Record<string, number>;
+        const progress = Object.fromEntries(
+          lessons.map((lesson) => {
+            const value = parsed[lesson.id] ?? 0;
+            return [lesson.id, Math.max(0, Math.min(100, Math.round((value / 10) * 100)))];
+          })
+        );
+        setProgressMap(progress);
+      } catch (error) {
+        console.error("Failed to load progress:", error);
+      }
+    };
+
+    loadProgress();
+  }, []);
 
   return (
     <aside className="sticky top-3 h-[calc(100vh-24px)] w-72 shrink-0 rounded-3xl border border-white/60 bg-white/55 p-4 shadow-[0_16px_44px_rgba(15,23,42,0.18)] backdrop-blur-md">
@@ -62,6 +74,10 @@ export function Sidebar() {
             const href = `/lesson/${lesson.id}`;
             const active = pathname === href;
             const locked = lesson.premium && !isSubscribed;
+            
+            // На сервере и во время первой гидратации показываем 0%
+            // После монтирования показываем реальный прогресс
+            const progress = isMounted ? (progressMap[lesson.id] ?? 0) : 0;
 
             return (
               <li key={lesson.id}>
@@ -94,7 +110,7 @@ export function Sidebar() {
                   <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-200">
                     <div
                       className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 transition-all duration-300"
-                      style={{ width: `${progressMap[lesson.id] ?? 0}%` }}
+                      style={{ width: `${progress}%` }}
                     />
                   </div>
                 </Link>

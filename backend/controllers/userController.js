@@ -4,7 +4,7 @@ const { User } = require('../models');
 exports.getProfile = async (req, res) => {
   try {
     const user = await User.findByPk(req.user.id, {
-      attributes: ['id', 'name', 'email', 'roleId', 'isSubscribed', 'subscriptionTier', 'createdAt'],
+      attributes: ['id', 'name', 'email', 'isSubscribed', 'subscriptionTier', 'createdAt'],
     });
 
     if (!user) {
@@ -22,7 +22,7 @@ exports.getProfile = async (req, res) => {
 exports.getAllUsers = async (req, res) => {
   try {
     const users = await User.findAll({
-      attributes: ['id', 'name', 'email', 'roleId', 'isSubscribed', 'subscriptionTier', 'createdAt'],
+      attributes: ['id', 'name', 'email', 'isSubscribed', 'subscriptionTier', 'createdAt'],
       order: [['createdAt', 'DESC']],
     });
 
@@ -36,9 +36,9 @@ exports.getAllUsers = async (req, res) => {
 // Обновить пользователя
 exports.updateUser = async (req, res) => {
   const { id } = req.params;
-  const { name, email, password, isSubscribed, subscriptionTier, role_id } = req.body;
+  const { name, email, password, isSubscribed, subscriptionTier } = req.body;
 
-  if (req.user.role_id !== 2 && id !== req.user.id) {
+  if (id !== req.user.id) {
     return res.status(403).json({ error: 'Нет прав для редактирования этого пользователя' });
   }
 
@@ -52,13 +52,9 @@ exports.updateUser = async (req, res) => {
     const updateData = {};
     if (name !== undefined) updateData.name = name;
     if (email !== undefined) updateData.email = email;
-    if (password !== undefined) updateData.password = password;
-
-    if (req.user.role_id === 2) {
-      if (isSubscribed !== undefined) updateData.isSubscribed = isSubscribed;
-      if (subscriptionTier !== undefined) updateData.subscriptionTier = subscriptionTier;
-      if (role_id !== undefined) updateData.roleId = role_id;
-    }
+    if (password !== undefined) updateData.passwordHash = password;
+    if (isSubscribed !== undefined) updateData.isSubscribed = isSubscribed;
+    if (subscriptionTier !== undefined) updateData.subscriptionTier = subscriptionTier;
 
     await user.update(updateData);
 
@@ -66,7 +62,6 @@ exports.updateUser = async (req, res) => {
       id: user.id,
       name: user.name,
       email: user.email,
-      role_id: user.roleId,
       isSubscribed: user.isSubscribed,
       subscriptionTier: user.subscriptionTier,
       createdAt: user.createdAt,
@@ -89,7 +84,7 @@ exports.updateUser = async (req, res) => {
 exports.deleteUser = async (req, res) => {
   const { id } = req.params;
 
-  if (req.user.role_id !== 2 && id !== req.user.id) {
+  if (id !== req.user.id) {
     return res.status(403).json({ error: 'Нет прав для удаления этого пользователя' });
   }
 
