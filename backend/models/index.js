@@ -1,37 +1,22 @@
-// models/index.js
 const sequelize = require('../config/database');
 
-// Импорт моделей
-const UserModel = require('./User');
-const LessonModel = require('./Lesson');
-const UserProgressModel = require('./UserProgress');
-const QuizResultModel = require('./QuizResult');
-
-// Инициализация моделей
-const User = UserModel(sequelize);
-const Lesson = LessonModel(sequelize);
-const UserProgress = UserProgressModel(sequelize);
-const QuizResult = QuizResultModel(sequelize);
+const User = require('./User')(sequelize);
+const Lesson = require('./Lesson')(sequelize);
+const UserProgress = require('./UserProgress')(sequelize);
+const QuizResult = require('./QuizResult')(sequelize);
 
 // Ассоциации
-// User -> UserProgress (один ко многим)
-User.hasMany(UserProgress, { foreignKey: 'user_id' });
-UserProgress.belongsTo(User, { foreignKey: 'user_id' });
+User.hasMany(UserProgress, { foreignKey: 'user_id', as: 'progress' });
+UserProgress.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 
-// User -> QuizResult (один ко многим)
-User.hasMany(QuizResult, { foreignKey: 'user_id' });
-QuizResult.belongsTo(User, { foreignKey: 'user_id' });
+User.hasMany(QuizResult, { foreignKey: 'user_id', as: 'quizResults' });
+QuizResult.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 
-// Lesson -> UserProgress (один ко многим)
-Lesson.hasMany(UserProgress, { foreignKey: 'lesson_id' });
-UserProgress.belongsTo(Lesson, { foreignKey: 'lesson_id' });
+Lesson.hasMany(UserProgress, { foreignKey: 'lesson_id', as: 'progressRecords' });
+UserProgress.belongsTo(Lesson, { foreignKey: 'lesson_id', as: 'lesson' });
 
-// Lesson -> QuizResult (один ко многим)
-Lesson.hasMany(QuizResult, { foreignKey: 'lesson_id' });
-QuizResult.belongsTo(Lesson, { foreignKey: 'lesson_id' });
-
-// UserProgress и QuizResult не связаны напрямую между собой,
-// но могут быть объединены через User и Lesson при необходимости
+Lesson.hasMany(QuizResult, { foreignKey: 'lesson_id', as: 'quizResults' });
+QuizResult.belongsTo(Lesson, { foreignKey: 'lesson_id', as: 'lesson' });
 
 module.exports = {
   sequelize,
@@ -39,4 +24,13 @@ module.exports = {
   Lesson,
   UserProgress,
   QuizResult,
+  
+  sync: async (force = false) => {
+    try {
+      await sequelize.sync({ force });
+      console.log('База данных синхронизирована');
+    } catch (error) {
+      console.error('Ошибка синхронизации:', error);
+    }
+  }
 };

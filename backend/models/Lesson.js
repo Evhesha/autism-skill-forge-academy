@@ -1,4 +1,3 @@
-// models/Lesson.js
 const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
@@ -19,7 +18,6 @@ module.exports = (sequelize) => {
     },
     description: {
       type: DataTypes.TEXT,
-      allowNull: true,
     },
     isFree: {
       type: DataTypes.BOOLEAN,
@@ -32,10 +30,8 @@ module.exports = (sequelize) => {
       unique: true,
     },
     content: {
-      type: DataTypes.JSON,
-      allowNull: false,
+      type: DataTypes.JSONB,
       defaultValue: [],
-      comment: 'Массив экранов урока: [{type: "video|checklist|quiz|protocol", data: {...}}]',
     },
   }, {
     tableName: 'lessons',

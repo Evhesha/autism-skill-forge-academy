@@ -1,4 +1,3 @@
-// models/UserProgress.js
 const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
@@ -30,9 +29,6 @@ module.exports = (sequelize) => {
       type: DataTypes.INTEGER,
       defaultValue: 0,
       field: 'current_step',
-      validate: {
-        min: 0,
-      },
     },
     isCompleted: {
       type: DataTypes.BOOLEAN,

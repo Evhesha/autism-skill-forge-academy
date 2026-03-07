@@ -3,30 +3,36 @@
     "username": "postgres",
     "password": "2722",
     "database": "autism_academy_dev",
-    "host": "127.0.0.1",
+    "host": "localhost",
+    "port": 5432,
     "dialect": "postgres",
     "define": {
-      "underscored": true
+      "underscored": true,
+      "timestamps": false
     }
   },
   "test": {
     "username": "postgres",
     "password": "2722",
     "database": "autism_academy_test",
-    "host": "127.0.0.1",
+    "host": "localhost",
+    "port": 5432,
     "dialect": "postgres",
     "define": {
-      "underscored": true
+      "underscored": true,
+      "timestamps": false
     }
   },
   "production": {
     "username": "postgres",
     "password": "2722",
     "database": "autism_academy_prod",
-    "host": "127.0.0.1",
+    "host": "localhost",
+    "port": 5432,
     "dialect": "postgres",
     "define": {
-      "underscored": true
+      "underscored": true,
+      "timestamps": false
     }
   }
 }

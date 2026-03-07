@@ -1,4 +1,3 @@
-// models/QuizResult.js
 const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
@@ -29,16 +28,15 @@ module.exports = (sequelize) => {
     score: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      validate: {
-        min: 0,
-        max: 100,
-      },
     },
     answers: {
-      type: DataTypes.JSON,
-      allowNull: false,
+      type: DataTypes.JSONB,
       defaultValue: [],
-      comment: 'Массив ответов пользователя на вопросы теста',
+    },
+    totalQuestions: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+      field: 'total_questions',
     },
     createdAt: {
       type: DataTypes.DATE,
