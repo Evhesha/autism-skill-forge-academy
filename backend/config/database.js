@@ -1,11 +1,14 @@
 require('dotenv').config();
 const { Sequelize } = require('sequelize');
+const pg = require('pg');
 
 const databaseUrl = process.env.DATABASE_URL;
 const isProduction = process.env.NODE_ENV === 'production';
 
 const commonOptions = {
   dialect: 'postgres',
+  // Force including pg in serverless bundles (Vercel) instead of relying on dynamic require.
+  dialectModule: pg,
   logging: process.env.NODE_ENV === 'development' ? console.log : false,
   define: {
     underscored: true,
