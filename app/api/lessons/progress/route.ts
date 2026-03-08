@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
-
-const BACKEND_URL = process.env.BACKEND_URL || "http://127.0.0.1:3001";
+import { resolveBackendUrl } from "@/lib/backendUrl";
 
 export async function GET(request: Request) {
+  const backendUrl = resolveBackendUrl();
+
   try {
-    const backendResponse = await fetch(`${BACKEND_URL}/lessons/progress`, {
+    const backendResponse = await fetch(`${backendUrl}/lessons/progress`, {
       method: "GET",
       headers: {
         cookie: request.headers.get("cookie") ?? "",
@@ -22,7 +23,7 @@ export async function GET(request: Request) {
   } catch (error) {
     const message = error instanceof Error ? error.message : "unknown";
     return NextResponse.json(
-      { error: `Lessons backend недоступен (${BACKEND_URL}): ${message}` },
+      { error: `Lessons backend недоступен (${backendUrl}): ${message}` },
       { status: 503 },
     );
   }

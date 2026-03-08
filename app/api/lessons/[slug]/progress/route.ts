@@ -1,16 +1,17 @@
 import { NextResponse } from "next/server";
-
-const BACKEND_URL = process.env.BACKEND_URL || "http://127.0.0.1:3001";
+import { resolveBackendUrl } from "@/lib/backendUrl";
 
 type RouteContext = {
   params: Promise<{ slug: string }>;
 };
 
 export async function GET(request: Request, { params }: RouteContext) {
+  const backendUrl = resolveBackendUrl();
+
   try {
     const { slug } = await params;
 
-    const backendResponse = await fetch(`${BACKEND_URL}/lessons/${slug}`, {
+    const backendResponse = await fetch(`${backendUrl}/lessons/${slug}`, {
       method: "GET",
       headers: {
         cookie: request.headers.get("cookie") ?? "",
@@ -28,18 +29,20 @@ export async function GET(request: Request, { params }: RouteContext) {
   } catch (error) {
     const message = error instanceof Error ? error.message : "unknown";
     return NextResponse.json(
-      { error: `Lessons backend недоступен (${BACKEND_URL}): ${message}` },
+      { error: `Lessons backend недоступен (${backendUrl}): ${message}` },
       { status: 503 },
     );
   }
 }
 
 export async function PATCH(request: Request, { params }: RouteContext) {
+  const backendUrl = resolveBackendUrl();
+
   try {
     const { slug } = await params;
     const payload = await request.json();
 
-    const backendResponse = await fetch(`${BACKEND_URL}/lessons/${slug}/progress`, {
+    const backendResponse = await fetch(`${backendUrl}/lessons/${slug}/progress`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -59,7 +62,7 @@ export async function PATCH(request: Request, { params }: RouteContext) {
   } catch (error) {
     const message = error instanceof Error ? error.message : "unknown";
     return NextResponse.json(
-      { error: `Lessons backend недоступен (${BACKEND_URL}): ${message}` },
+      { error: `Lessons backend недоступен (${backendUrl}): ${message}` },
       { status: 503 },
     );
   }

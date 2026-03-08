@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-
-const BACKEND_URL = process.env.BACKEND_URL || "http://127.0.0.1:3001";
+import { resolveBackendUrl } from "@/lib/backendUrl";
 
 type StripeSessionResponse = {
   id?: string;
@@ -10,6 +9,7 @@ type StripeSessionResponse = {
 };
 
 export async function POST(request: Request) {
+  const backendUrl = resolveBackendUrl();
   const secretKey = process.env.STRIPE_SECRET_KEY;
 
   if (!secretKey) {
@@ -51,7 +51,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Stripe Checkout ещё не завершён успешно." }, { status: 400 });
     }
 
-    const backendResponse = await fetch(`${BACKEND_URL}/billing/activate-premium`, {
+    const backendResponse = await fetch(`${backendUrl}/billing/activate-premium`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

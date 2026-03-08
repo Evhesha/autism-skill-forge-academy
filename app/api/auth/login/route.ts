@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
-
-const BACKEND_URL = process.env.BACKEND_URL || "http://127.0.0.1:3001";
+import { resolveBackendUrl } from "@/lib/backendUrl";
 
 export async function POST(request: Request) {
+  const backendUrl = resolveBackendUrl();
+
   try {
     const payload = await request.json();
 
-    const backendResponse = await fetch(`${BACKEND_URL}/login`, {
+    const backendResponse = await fetch(`${backendUrl}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -30,7 +31,7 @@ export async function POST(request: Request) {
   } catch (error) {
     const message = error instanceof Error ? error.message : "unknown";
     return NextResponse.json(
-      { error: `Auth backend недоступен (${BACKEND_URL}): ${message}` },
+      { error: `Auth backend недоступен (${backendUrl}): ${message}` },
       { status: 503 },
     );
   }
