@@ -28,6 +28,11 @@ module.exports = async (req, res) => {
     console.error('Failed to initialize database in serverless runtime:', error);
     res.statusCode = 500;
     res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify({ error: 'Database initialization failed' }));
+    res.end(
+      JSON.stringify({
+        error: 'Database initialization failed',
+        details: error instanceof Error ? error.message : String(error),
+      })
+    );
   }
 };
