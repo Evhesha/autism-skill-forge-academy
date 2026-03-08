@@ -9,20 +9,23 @@ export function LessonProgressBar({
   currentStep,
   totalSteps,
 }: LessonProgressBarProps) {
+  const safeTotalSteps = Math.max(1, totalSteps);
+  const safeCurrentStep = Math.max(1, Math.min(safeTotalSteps, currentStep));
+
   return (
     <div className="rounded-2xl border-2 border-slate-900 bg-white p-4 shadow-sm">
       <div className="mb-3 flex items-center justify-between">
         <p className="text-sm font-semibold text-slate-800">Module Progress</p>
         <p className="text-sm font-bold text-slate-950">
-          {currentStep}/{totalSteps}
+          {safeCurrentStep}/{safeTotalSteps}
         </p>
       </div>
 
       <div className="grid grid-cols-10 gap-2">
-        {Array.from({ length: totalSteps }, (_, index) => {
+        {Array.from({ length: safeTotalSteps }, (_, index) => {
           const stepNumber = index + 1;
-          const isDone = stepNumber < currentStep;
-          const isCurrent = stepNumber === currentStep;
+          const isDone = stepNumber < safeCurrentStep;
+          const isCurrent = stepNumber === safeCurrentStep;
 
           return (
             <div

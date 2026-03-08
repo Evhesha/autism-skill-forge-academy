@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BrainCircuit, LayoutDashboard, UserRound } from "lucide-react";
+import { useAuth } from "@/app/context/AuthContext";
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -11,6 +12,7 @@ const navItems = [
 
 export function AppHeader() {
   const pathname = usePathname();
+  const { isAuthenticated, isSubscribed, user } = useAuth();
 
   return (
     <header className="sticky top-0 z-40 border-b border-white/70 bg-white/90 backdrop-blur">
@@ -21,16 +23,36 @@ export function AppHeader() {
         </Link>
         
         <div className="flex items-center gap-2">
-          <Link
-            href="/auth"
-            className={`inline-flex items-center rounded-lg px-3 py-2 text-sm font-semibold transition ${
-              pathname === "/auth"
-                ? "text-cyan-900"
-                : "text-slate-600 hover:bg-white hover:text-slate-900"
-            }`}
-          >
-            Login
-          </Link>
+          {isAuthenticated && user ? (
+            <Link
+              href="/profile"
+              className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition ${
+                pathname === "/profile"
+                  ? "text-cyan-900"
+                  : "text-slate-600 hover:bg-white hover:text-slate-900"
+              }`}
+            >
+              <span className="max-w-[140px] truncate">{user.name}</span>
+              <span
+                className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${
+                  isSubscribed ? "bg-emerald-100 text-emerald-700" : "bg-slate-200 text-slate-700"
+                }`}
+              >
+                {isSubscribed ? "Premium" : "Free"}
+              </span>
+            </Link>
+          ) : (
+            <Link
+              href="/auth"
+              className={`inline-flex items-center rounded-lg px-3 py-2 text-sm font-semibold transition ${
+                pathname === "/auth"
+                  ? "text-cyan-900"
+                  : "text-slate-600 hover:bg-white hover:text-slate-900"
+              }`}
+            >
+              Login
+            </Link>
+          )}
 
           <nav className="flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 p-1">
             {navItems.map(({ href, label, icon: Icon }) => {

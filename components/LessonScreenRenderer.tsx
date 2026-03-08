@@ -44,13 +44,13 @@ export function LessonScreenRenderer({ screen }: Props) {
   const [showCaptions, setShowCaptions] = useState(true);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [expandedProtocolStep, setExpandedProtocolStep] = useState<number | null>(0);
+  const checklistItemsCount = screen.type === "checklist" ? screen.items.length : 0;
 
   const checklistProgress = useMemo(() => {
-    const values = Object.values(checked);
-    if (values.length === 0) return 0;
-    const done = values.filter(Boolean).length;
-    return Math.round((done / values.length) * 100);
-  }, [checked]);
+    if (checklistItemsCount === 0) return 0;
+    const done = Object.values(checked).filter(Boolean).length;
+    return Math.round((done / checklistItemsCount) * 100);
+  }, [checked, checklistItemsCount]);
 
   const checkedCount = useMemo(
     () => Object.values(checked).filter(Boolean).length,

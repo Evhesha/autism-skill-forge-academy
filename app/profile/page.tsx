@@ -232,9 +232,14 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              <Link href="/premium" className={`mt-5 inline-flex w-full items-center justify-center rounded-2xl px-4 py-3 text-sm font-bold transition ${isSubscribed ? "border border-slate-300 bg-white text-slate-800 hover:bg-slate-50" : "bg-slate-900 text-white hover:bg-slate-800"}`}>
-                {isSubscribed ? "Управление подпиской" : "Открыть Premium"}
-              </Link>
+              {!isSubscribed && (
+                <Link
+                  href="/premium"
+                  className="mt-5 inline-flex w-full items-center justify-center rounded-2xl bg-slate-900 px-4 py-3 text-sm font-bold text-white transition hover:bg-slate-800"
+                >
+                  Открыть Premium
+                </Link>
+              )}
             </article>
 
             <article className="rounded-[30px] border border-white/80 bg-white/85 p-6 shadow-[0_20px_50px_rgba(15,23,42,0.07)] backdrop-blur">
