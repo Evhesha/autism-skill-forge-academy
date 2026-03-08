@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { ChevronLeft } from "lucide-react";
 import { PremiumAccessFlow } from "@/components/PremiumAccessFlow";
 
@@ -13,7 +14,9 @@ export default function PremiumPage() {
           <ChevronLeft size={16} /> На главную
         </Link>
       </div>
-      <PremiumAccessFlow />
+      <Suspense fallback={<div className="mx-auto w-full max-w-6xl px-4 py-10 text-sm text-slate-500">Loading premium flow...</div>}>
+        <PremiumAccessFlow />
+      </Suspense>
     </main>
   );
 }
