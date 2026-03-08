@@ -1,6 +1,6 @@
 require("dotenv").config();
 
-const databaseUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL;
+const databaseUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.DATABASE_URL_PROD;
 const isProduction = process.env.NODE_ENV === "production";
 const username = process.env.DB_USER || "postgres";
 const password = process.env.DB_PASSWORD || "postgres";
