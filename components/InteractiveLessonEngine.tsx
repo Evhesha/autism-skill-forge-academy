@@ -18,15 +18,13 @@ export function InteractiveLessonEngine({ lesson }: Props) {
   const totalSteps = Math.max(1, lesson.screens.length);
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoaded, setIsLoaded] = useState(false);
-  const effectiveStep = isAuthenticated ? currentStep : 1;
-  const effectiveLoaded = isAuthenticated ? isLoaded : true;
+  const effectiveStep = currentStep;
+  const effectiveLoaded = isLoaded;
 
   useEffect(() => {
     let isCancelled = false;
 
-    if (!isAuthenticated) return () => { isCancelled = true; };
-
-    fetchLessonProgress(lesson.id)
+    fetchLessonProgress(lesson.id, isAuthenticated)
       .then((progress) => {
         if (isCancelled) return;
         const step = progress?.currentStep ?? 0;
@@ -48,11 +46,11 @@ export function InteractiveLessonEngine({ lesson }: Props) {
   }, [isAuthenticated, lesson.id, totalSteps]);
 
   useEffect(() => {
-    if (!isLoaded || !isAuthenticated || locked) {
+    if (!isLoaded || locked) {
       return;
     }
 
-    void saveLessonProgress(lesson.id, currentStep, totalSteps).catch((error) => {
+    void saveLessonProgress(lesson.id, currentStep, totalSteps, isAuthenticated).catch((error) => {
       console.error("Failed to persist lesson progress:", error);
     });
   }, [currentStep, isAuthenticated, isLoaded, lesson.id, locked, totalSteps]);

@@ -39,9 +39,7 @@ export default function HomePage() {
   useEffect(() => {
     let isCancelled = false;
 
-    if (!isAuthenticated) return () => { isCancelled = true; };
-
-    fetchAllLessonProgress()
+    fetchAllLessonProgress(isAuthenticated)
       .then((progress) => {
         if (isCancelled) return;
         setProgressMap(progress);
@@ -62,19 +60,19 @@ export default function HomePage() {
         <p className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em]">
           <Sparkles size={14} /> AutismSkillForge Academy
         </p>
-        <h1 className="max-w-3xl text-3xl font-black md:text-5xl">Interactive E-Learning Platform for Structured Skill Building</h1>
+        <h1 className="max-w-3xl text-3xl font-black md:text-5xl">Интерактивная платформа электронного обучения для структурированного развития навыков.</h1>
         <p className="mt-3 max-w-2xl text-sm text-cyan-100 md:text-base">
-          Добро пожаловать{user?.name ? `, ${user.name}` : ""}. Выберите урок и проходите 10 экранов с чеклистами,
+          Добро пожаловать{user?.name ? `, ${user.name}` : ""}. Выберите урок и проходите экраны с чеклистами,
           видео, тестами и протоколами в одном динамическом потоке.
         </p>
       </section>
 
       <section>
         <div className="mb-4 flex items-end justify-between gap-4">
-          <h2 className="text-2xl font-bold text-slate-900 md:text-3xl">Lesson Grid</h2>
+          <h2 className="text-2xl font-bold text-slate-900 md:text-3xl">Уроки</h2>
           {!isSubscribed && (
             <Link href="/premium" className="text-sm font-semibold text-cyan-700 hover:underline">
-              Upgrade to Premium
+              Получить Premium
             </Link>
           )}
         </div>
