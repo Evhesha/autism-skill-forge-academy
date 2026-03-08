@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   CheckCircle2,
-  Crown,
   Lock,
   Rocket,
   ShieldCheck,
@@ -157,28 +156,20 @@ export function PremiumAccessFlow() {
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
               <ShieldCheck size={30} />
             </div>
-            <h2 className="mb-2 text-2xl font-extrabold text-slate-900">Checkout завершён</h2>
+            <h2 className="mb-2 text-2xl font-extrabold text-slate-900">Оплата прошла успешно</h2>
             <p className="mb-6 text-sm text-slate-600">
-              Stripe вернул пользователя после успешной тестовой оплаты.
+              Подписка активирована. Данные профиля и токен обновлены.
             </p>
 
-            <div className="flex flex-wrap justify-center gap-3">
-              <button
-                type="button"
-                onClick={() => setStep("locked")}
-                className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-              >
-                Закрыть
-              </button>
+            <div className="flex justify-center">
               <button
                 type="button"
                 onClick={() => {
-                  setError(null);
-                  setStep("locked");
+                  window.location.href = "/profile";
                 }}
-                className="inline-flex items-center gap-2 rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800"
+                className="rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-800"
               >
-                <Crown size={16} /> Повторить тест
+                Ок
               </button>
             </div>
           </div>

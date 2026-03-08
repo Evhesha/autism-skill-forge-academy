@@ -79,7 +79,8 @@ export default function HomePage() {
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {lessons.map((lesson, index) => {
-            const locked = lesson.premium && !isSubscribed;
+            const requiresAuth = Boolean(lesson.requiresAuth);
+            const locked = lesson.premium ? !isSubscribed : requiresAuth && !isAuthenticated;
             const lessonProgress = progressMap[lesson.id];
             const progress = lessonProgress
               ? progressToPercent(lessonProgress.currentStep, lessonProgress.isCompleted, lesson.screens.length)
@@ -97,6 +98,10 @@ export default function HomePage() {
                     {lesson.premium ? (
                       <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold uppercase text-amber-700">
                         Premium
+                      </span>
+                    ) : requiresAuth ? (
+                      <span className="rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-bold uppercase text-sky-700">
+                        Members
                       </span>
                     ) : (
                       <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold uppercase text-emerald-700">

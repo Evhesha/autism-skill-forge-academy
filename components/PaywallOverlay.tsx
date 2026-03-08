@@ -2,10 +2,16 @@ import Link from "next/link";
 import { Lock } from "lucide-react";
 import { useAuth } from "@/app/context/AuthContext";
 
-export function PaywallOverlay({ lessonTitle }: { lessonTitle: string }) {
+type PaywallMode = "auth" | "premium";
+
+export function PaywallOverlay({ lessonTitle, mode }: { lessonTitle: string; mode: PaywallMode }) {
   const { isAuthenticated } = useAuth();
-  const ctaHref = isAuthenticated ? "/premium" : "/auth";
-  const ctaLabel = isAuthenticated ? "Перейти к оплате" : "Зарегистрироваться";
+  const ctaHref = mode === "auth" ? "/auth" : isAuthenticated ? "/premium" : "/auth";
+  const ctaLabel = mode === "auth" ? "Войти или зарегистрироваться" : isAuthenticated ? "Перейти к оплате" : "Зарегистрироваться";
+  const title = mode === "auth" ? "Доступно зарегистрированным" : "Upgrade to Premium";
+  const description = mode === "auth"
+    ? "Урок доступен только зарегистрированным пользователям."
+    : "Урок доступен только в премиум-подписке.";
 
   return (
     <div className="absolute inset-0 z-20 flex items-center justify-center rounded-3xl bg-slate-900/35 p-4">
@@ -13,11 +19,11 @@ export function PaywallOverlay({ lessonTitle }: { lessonTitle: string }) {
         <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-amber-700">
           <Lock size={22} />
         </div>
-        <h3 className="text-xl font-bold text-slate-900">Upgrade to Premium</h3>
+        <h3 className="text-xl font-bold text-slate-900">{title}</h3>
         <p className="mt-2 text-sm text-slate-600">
-          Урок <span className="font-semibold">{lessonTitle}</span> доступен только в премиум-подписке.
+          Урок <span className="font-semibold">{lessonTitle}</span>. {description}
         </p>
-        {!isAuthenticated && (
+        {mode === "premium" && !isAuthenticated && (
           <p className="mt-1 text-xs text-slate-500">Сначала регистрация, затем можно оформить Premium.</p>
         )}
         <Link

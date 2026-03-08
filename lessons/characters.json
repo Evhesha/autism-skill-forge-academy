@@ -3,7 +3,8 @@
   "title": "Урок 2: Персонажи",
   "shortTitle": "Персонажи",
   "subtitle": "Маша -> Девочка -> Кресло",
-  "premium": true,
+  "premium": false,
+  "requiresAuth": true,
   "chain": {
     "a": "Маша",
     "b": "Девочка",

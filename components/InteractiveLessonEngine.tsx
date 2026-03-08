@@ -14,7 +14,9 @@ type Props = {
 
 export function InteractiveLessonEngine({ lesson }: Props) {
   const { isAuthenticated, isSubscribed } = useAuth();
-  const locked = lesson.premium && !isSubscribed;
+  const requiresAuth = Boolean(lesson.requiresAuth);
+  const lockMode = lesson.premium ? "premium" : requiresAuth ? "auth" : "none";
+  const locked = lockMode === "premium" ? !isSubscribed : lockMode === "auth" ? !isAuthenticated : false;
   const totalSteps = Math.max(1, lesson.screens.length);
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -72,9 +74,9 @@ export function InteractiveLessonEngine({ lesson }: Props) {
         <div className={`space-y-4 rounded-3xl border border-slate-200 bg-slate-50 p-4 md:p-6 ${locked ? "blur-sm" : ""}`}>
           <div className="flex items-center justify-between">
             <p className="text-sm font-semibold text-slate-600">Step {effectiveStep} / {totalSteps}</p>
-            {lesson.premium && (
+            {lockMode !== "none" && (
               <p className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-1 text-xs font-bold text-amber-700">
-                <Lock size={12} /> Premium lesson
+                <Lock size={12} /> {lockMode === "premium" ? "Premium lesson" : "Members lesson"}
               </p>
             )}
           </div>
@@ -111,7 +113,7 @@ export function InteractiveLessonEngine({ lesson }: Props) {
           </div>
         </div>
 
-        {locked && <PaywallOverlay lessonTitle={lesson.shortTitle} />}
+        {locked && <PaywallOverlay lessonTitle={lesson.shortTitle} mode={lockMode === "premium" ? "premium" : "auth"} />}
       </div>
     </section>
   );

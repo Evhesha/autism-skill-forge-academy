@@ -52,6 +52,7 @@ export type Lesson = {
   shortTitle: string;
   subtitle: string;
   premium: boolean;
+  requiresAuth?: boolean;
   chain: {
     a: string;
     b: string;

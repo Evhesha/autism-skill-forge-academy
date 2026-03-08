@@ -78,6 +78,7 @@ function isLesson(value: unknown): value is Lesson {
     typeof value.shortTitle === "string" &&
     typeof value.subtitle === "string" &&
     typeof value.premium === "boolean" &&
+    (!("requiresAuth" in value) || typeof value.requiresAuth === "boolean") &&
     isObject(value.chain) &&
     typeof value.chain.a === "string" &&
     typeof value.chain.b === "string" &&
@@ -88,6 +89,12 @@ function isLesson(value: unknown): value is Lesson {
     Array.isArray(value.screens) &&
     value.screens.every(isLessonScreen)
   );
+}
+
+function lessonAccessRank(lesson: Lesson) {
+  if (lesson.premium) return 2;
+  if (lesson.requiresAuth) return 1;
+  return 0;
 }
 
 async function loadLessonFromFile(fileName: string): Promise<Lesson | null> {
@@ -124,8 +131,11 @@ export async function getLessons(): Promise<Lesson[]> {
   return lessons
     .filter((lesson): lesson is Lesson => lesson !== null)
     .sort((left, right) => {
-      if (left.premium !== right.premium) {
-        return Number(left.premium) - Number(right.premium);
+      const leftRank = lessonAccessRank(left);
+      const rightRank = lessonAccessRank(right);
+
+      if (leftRank !== rightRank) {
+        return leftRank - rightRank;
       }
 
       return left.title.localeCompare(right.title, "ru");
