@@ -37,6 +37,19 @@ const TOKEN_KEY = "token";
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+async function parseJsonSafely<T>(response: Response): Promise<T | null> {
+  const text = await response.text();
+  if (!text) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    return null;
+  }
+}
+
 function readCookie(name: string): string | null {
   if (typeof document === "undefined") {
     return null;
@@ -159,7 +172,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       credentials: "include",
     });
 
-    const data = (await response.json()) as
+    const data = (await parseJsonSafely<
       | {
           user: {
             id: number | string;
@@ -170,7 +183,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           };
           token?: string;
         }
-      | { error?: string };
+      | { error?: string }
+    >(response)) ?? { error: "Пустой или некорректный ответ сервера." };
 
     if (!response.ok || !("user" in data)) {
       throw new Error(("error" in data && data.error) || "Не удалось войти.");
@@ -201,7 +215,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       credentials: "include",
     });
 
-    const data = (await response.json()) as { error?: string };
+    const data = (await parseJsonSafely<{ error?: string }>(response)) ?? {
+      error: "Пустой или некорректный ответ сервера.",
+    };
 
     if (!response.ok) {
       throw new Error(data.error || "Не удалось зарегистрироваться.");
