@@ -1,6 +1,7 @@
 require("dotenv").config();
 
 const databaseUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL;
+const isProduction = process.env.NODE_ENV === "production";
 const username = process.env.DB_USER || "postgres";
 const password = process.env.DB_PASSWORD || "postgres";
 const database = process.env.DB_NAME || process.env.DB_DATABASE || "autism_academy";
@@ -37,6 +38,10 @@ const productionConfig = databaseUrl
       },
     }
   : localConfig;
+
+if (isProduction && !databaseUrl) {
+  throw new Error("DATABASE_URL or POSTGRES_URL is required in production.");
+}
 
 module.exports = {
   development: localConfig,

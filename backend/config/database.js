@@ -5,6 +5,10 @@ const pg = require('pg');
 const databaseUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL;
 const isProduction = process.env.NODE_ENV === 'production';
 
+if (isProduction && !databaseUrl) {
+  throw new Error('DATABASE_URL or POSTGRES_URL is required in production.');
+}
+
 const commonOptions = {
   dialect: 'postgres',
   // Force including pg in serverless bundles (Vercel) instead of relying on dynamic require.
