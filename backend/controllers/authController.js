@@ -74,7 +74,8 @@ exports.login = async (req, res) => {
       // Allow frontend JS to read cookie (requested behavior).
       httpOnly: false,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'lax',
+      path: '/',
       maxAge: 24 * 60 * 60 * 1000,
     };
 
@@ -100,7 +101,8 @@ exports.login = async (req, res) => {
 exports.logout = (req, res) => {
   res.clearCookie('token', {
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    sameSite: 'lax',
+    path: '/',
   });
   res.json({ message: 'Выход выполнен' });
 };

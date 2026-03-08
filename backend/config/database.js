@@ -1,20 +1,41 @@
-// config/database.js
 require('dotenv').config();
 const { Sequelize } = require('sequelize');
 
-const sequelize = new Sequelize(
-  process.env.DB_NAME || process.env.DB_DATABASE || 'autism_academy',
-  process.env.DB_USER || 'postgres',
-  process.env.DB_PASSWORD || 'postgres',
-  {
-    host: process.env.DB_HOST || 'localhost',
-    port: process.env.DB_PORT || 5432,
-    dialect: 'postgres',
-    logging: process.env.NODE_ENV === 'development' ? console.log : false,
-    define: {
-      underscored: true, // автоматически преобразует camelCase в snake_case
-    },
-  }
-);
+const databaseUrl = process.env.DATABASE_URL;
+const isProduction = process.env.NODE_ENV === 'production';
+
+const commonOptions = {
+  dialect: 'postgres',
+  logging: process.env.NODE_ENV === 'development' ? console.log : false,
+  define: {
+    underscored: true,
+  },
+};
+
+const sslOptions = isProduction
+  ? {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false,
+      },
+    }
+  : undefined;
+
+const sequelize = databaseUrl
+  ? new Sequelize(databaseUrl, {
+      ...commonOptions,
+      dialectOptions: sslOptions,
+    })
+  : new Sequelize(
+      process.env.DB_NAME || process.env.DB_DATABASE || 'autism_academy',
+      process.env.DB_USER || 'postgres',
+      process.env.DB_PASSWORD || 'postgres',
+      {
+        ...commonOptions,
+        host: process.env.DB_HOST || 'localhost',
+        port: Number(process.env.DB_PORT || 5432),
+        dialectOptions: sslOptions,
+      }
+    );
 
 module.exports = sequelize;
