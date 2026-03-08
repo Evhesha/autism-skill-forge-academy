@@ -1,13 +1,33 @@
 'use strict';
 
+async function tableExists(queryInterface, tableName) {
+  try {
+    await queryInterface.describeTable(tableName);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 module.exports = {
   async up(queryInterface, Sequelize) {
-    // Создаем ENUM тип для subscription_tier
+    // This migration duplicates the schema from the previous migration.
+    // Keep it idempotent so production migrations don't fail on existing tables.
+    if (await tableExists(queryInterface, 'users')) {
+      return;
+    }
+
     await queryInterface.sequelize.query(`
-      CREATE TYPE "enum_users_subscription_tier" AS ENUM('free', 'premium');
+      DO $$
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_type WHERE typname = 'enum_users_subscription_tier'
+        ) THEN
+          CREATE TYPE "enum_users_subscription_tier" AS ENUM('free', 'premium');
+        END IF;
+      END $$;
     `);
 
-    // Создаем таблицу users
     await queryInterface.createTable('users', {
       id: {
         type: Sequelize.UUID,
@@ -41,7 +61,6 @@ module.exports = {
       },
     });
 
-    // Создаем таблицу lessons
     await queryInterface.createTable('lessons', {
       id: {
         type: Sequelize.INTEGER,
@@ -75,7 +94,6 @@ module.exports = {
       },
     });
 
-    // Создаем таблицу user_progress
     await queryInterface.createTable('user_progress', {
       id: {
         type: Sequelize.UUID,
@@ -116,13 +134,11 @@ module.exports = {
       },
     });
 
-    // Добавляем уникальный индекс
     await queryInterface.addIndex('user_progress', ['user_id', 'lesson_id'], {
       unique: true,
-      name: 'user_progress_user_lesson_unique'
+      name: 'user_progress_user_lesson_unique',
     });
 
-    // Создаем таблицу quiz_results
     await queryInterface.createTable('quiz_results', {
       id: {
         type: Sequelize.UUID,
@@ -164,14 +180,12 @@ module.exports = {
     });
   },
 
-  async down(queryInterface, Sequelize) {
-    // Удаляем таблицы в обратном порядке
+  async down(queryInterface) {
     await queryInterface.dropTable('quiz_results');
     await queryInterface.dropTable('user_progress');
     await queryInterface.dropTable('lessons');
     await queryInterface.dropTable('users');
-    
-    // Удаляем ENUM тип
+
     await queryInterface.sequelize.query('DROP TYPE IF EXISTS "enum_users_subscription_tier";');
-  }
+  },
 };

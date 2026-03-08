@@ -15,14 +15,15 @@ const base = {
   },
 };
 
+// Временно замените localConfig на это:
 const localConfig = {
   ...base,
-  username,
-  password,
-  database,
-  host,
-  port,
+  url: process.env.DATABASE_URL || "postgres://localhost:5432/db", 
+  dialectOptions: {
+    ssl: { require: true, rejectUnauthorized: false }
+  }
 };
+
 
 const productionConfig = databaseUrl
   ? {
