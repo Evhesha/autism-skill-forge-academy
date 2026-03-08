@@ -1,60 +1,104 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   CheckCircle2,
   Crown,
   Lock,
   Rocket,
   ShieldCheck,
-  X,
 } from "lucide-react";
+import { useAuth } from "@/app/context/AuthContext";
 
-type FlowStep = "locked" | "payment" | "success";
-
-type CardData = {
-  number: string;
-  expiry: string;
-  cvc: string;
-  zip: string;
-};
-
-const initialCard: CardData = {
-  number: "",
-  expiry: "",
-  cvc: "",
-  zip: "",
-};
+type FlowStep = "locked" | "success" | "cancel";
 
 export function PremiumAccessFlow() {
+  const { refreshProfile, user } = useAuth();
+  const searchParams = useSearchParams();
   const [step, setStep] = useState<FlowStep>("locked");
-  const [card, setCard] = useState<CardData>(initialCard);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const isValid = useMemo(() => {
-    return (
-      card.number.trim().length >= 16 &&
-      card.expiry.trim().length >= 4 &&
-      card.cvc.trim().length >= 3
-    );
-  }, [card]);
+  useEffect(() => {
+    const status = searchParams.get("status");
+    const sessionId = searchParams.get("session_id");
 
-  const pay = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setError(null);
+    if (status === "success") {
+      if (!sessionId) {
+        setStep("success");
+        return;
+      }
 
-    if (!isValid) {
-      setError("Проверьте номер карты, срок действия и CVC.");
-      return;
+      let isCancelled = false;
+
+      setLoading(true);
+      setError(null);
+
+      void fetch("/api/stripe/confirm", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ sessionId }),
+      })
+        .then(async (response) => {
+          const payload = (await response.json()) as { error?: string };
+          if (!response.ok) {
+            throw new Error(payload.error || "Не удалось активировать Premium.");
+          }
+          await refreshProfile();
+          if (!isCancelled) {
+            setStep("success");
+          }
+        })
+        .catch((confirmError) => {
+          if (isCancelled) return;
+          setError(confirmError instanceof Error ? confirmError.message : "Не удалось активировать Premium.");
+          setStep("locked");
+        })
+        .finally(() => {
+          if (!isCancelled) {
+            setLoading(false);
+          }
+        });
+
+      return () => {
+        isCancelled = true;
+      };
     }
 
+    if (status === "cancel") {
+      setStep("cancel");
+      return;
+    }
+  }, [refreshProfile, searchParams]);
+
+  const startCheckout = async () => {
+    setError(null);
     setLoading(true);
 
-    await new Promise((resolve) => setTimeout(resolve, 900));
+    try {
+      const response = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fullName: user?.name || "",
+          email: user?.email || "",
+          source: "premium-page",
+        }),
+      });
 
-    setLoading(false);
-    setStep("success");
+      const payload = (await response.json()) as { url?: string; error?: string };
+
+      if (!response.ok || !payload.url) {
+        throw new Error(payload.error || "Не удалось создать Stripe Checkout Session.");
+      }
+
+      window.location.href = payload.url;
+    } catch (checkoutError) {
+      setLoading(false);
+      setError(checkoutError instanceof Error ? checkoutError.message : "Ошибка запуска оплаты.");
+    }
   };
 
   return (
@@ -92,88 +136,19 @@ export function PremiumAccessFlow() {
               <p className="inline-flex items-center gap-2"><CheckCircle2 size={16} className="text-blue-700" /> Расширенная аналитика прогресса</p>
             </div>
 
+            {loading && searchParams.get("status") === "success" && (
+              <p className="mb-4 text-sm text-slate-600">Подтверждаем оплату и обновляем подписку...</p>
+            )}
+            {error && <p className="mb-4 text-sm text-rose-700">{error}</p>}
+
             <button
               type="button"
-              onClick={() => setStep("payment")}
-              className="inline-flex items-center gap-2 rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-800"
+              onClick={() => void startCheckout()}
+              disabled={loading}
+              className="inline-flex items-center gap-2 rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-800 disabled:bg-slate-400"
             >
-              <Rocket size={16} /> Оформить подписку
+              <Rocket size={16} /> {loading ? "Переходим в Stripe..." : "Оформить подписку"}
             </button>
-          </div>
-        )}
-
-        {step === "payment" && (
-          <div>
-            <div className="mb-5 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-slate-900">Оплата подписки</h2>
-              <button
-                type="button"
-                onClick={() => setStep("locked")}
-                className="text-slate-500 hover:text-slate-800"
-                aria-label="Close"
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            <div className="mb-5 rounded-lg border border-blue-200 bg-blue-50 p-3">
-              <p className="text-sm font-semibold text-slate-900">Premium: 29 BYN / месяц</p>
-              <p className="mt-1 text-xs text-slate-600">Отмена в любое время.</p>
-            </div>
-
-            <form className="space-y-4" onSubmit={pay}>
-              <label className="block text-sm">
-                <span className="mb-1 block font-medium text-slate-700">Номер карты</span>
-                <input
-                  value={card.number}
-                  onChange={(event) => setCard((prev) => ({ ...prev, number: event.target.value }))}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none ring-blue-700/20 focus:border-blue-500 focus:ring"
-                  placeholder="0000 0000 0000 0000"
-                />
-              </label>
-
-              <div className="grid grid-cols-2 gap-3">
-                <label className="block text-sm">
-                  <span className="mb-1 block font-medium text-slate-700">Срок действия</span>
-                  <input
-                    value={card.expiry}
-                    onChange={(event) => setCard((prev) => ({ ...prev, expiry: event.target.value }))}
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none ring-blue-700/20 focus:border-blue-500 focus:ring"
-                    placeholder="MM/YY"
-                  />
-                </label>
-
-                <label className="block text-sm">
-                  <span className="mb-1 block font-medium text-slate-700">CVC</span>
-                  <input
-                    value={card.cvc}
-                    onChange={(event) => setCard((prev) => ({ ...prev, cvc: event.target.value }))}
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none ring-blue-700/20 focus:border-blue-500 focus:ring"
-                    placeholder="123"
-                  />
-                </label>
-              </div>
-
-              <label className="block text-sm">
-                <span className="mb-1 block font-medium text-slate-700">Индекс (опционально)</span>
-                <input
-                  value={card.zip}
-                  onChange={(event) => setCard((prev) => ({ ...prev, zip: event.target.value }))}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none ring-blue-700/20 focus:border-blue-500 focus:ring"
-                  placeholder="220000"
-                />
-              </label>
-
-              {error && <p className="text-sm text-rose-700">{error}</p>}
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="inline-flex items-center gap-2 rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-800 disabled:bg-slate-400"
-              >
-                {loading ? "Обработка..." : "Оплатить"}
-              </button>
-            </form>
           </div>
         )}
 
@@ -182,9 +157,9 @@ export function PremiumAccessFlow() {
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
               <ShieldCheck size={30} />
             </div>
-            <h2 className="mb-2 text-2xl font-extrabold text-slate-900">Оплата прошла успешно</h2>
+            <h2 className="mb-2 text-2xl font-extrabold text-slate-900">Checkout завершён</h2>
             <p className="mb-6 text-sm text-slate-600">
-              Подписка Premium активирована. Контент разблокирован.
+              Stripe вернул пользователя после успешной тестовой оплаты.
             </p>
 
             <div className="flex flex-wrap justify-center gap-3">
@@ -198,14 +173,36 @@ export function PremiumAccessFlow() {
               <button
                 type="button"
                 onClick={() => {
-                  setCard(initialCard);
-                  setStep("payment");
+                  setError(null);
+                  setStep("locked");
                 }}
                 className="inline-flex items-center gap-2 rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800"
               >
-                <Crown size={16} /> Управление подпиской
+                <Crown size={16} /> Повторить тест
               </button>
             </div>
+          </div>
+        )}
+
+        {step === "cancel" && (
+          <div className="text-center">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 text-amber-700">
+              <Lock size={30} />
+            </div>
+            <h2 className="mb-2 text-2xl font-extrabold text-slate-900">Оплата отменена</h2>
+            <p className="mb-6 text-sm text-slate-600">
+              Пользователь вернулся со Stripe без завершения Checkout.
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setError(null);
+                setStep("locked");
+              }}
+              className="inline-flex items-center gap-2 rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800"
+            >
+              <Rocket size={16} /> Попробовать снова
+            </button>
           </div>
         )}
       </div>

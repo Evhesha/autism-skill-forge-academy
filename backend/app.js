@@ -9,6 +9,7 @@ const userController = require('./controllers/userController');
 const lessonController = require('./controllers/lessonController');
 const userProgressController = require('./controllers/userProgressController');
 const quizResultController = require('./controllers/quizResultController');
+const billingController = require('./controllers/billingController');
 
 const app = express();
 const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:3000')
@@ -59,6 +60,7 @@ app.post('/progress', authenticateToken, userProgressController.upsertProgress);
 
 app.get('/quiz-results', authenticateToken, quizResultController.getMyQuizResults);
 app.post('/quiz-results', authenticateToken, quizResultController.createQuizResult);
+app.post('/billing/activate-premium', authenticateToken, billingController.activatePremium);
 
 app.use((req, res) => {
   res.status(404).json({ error: `Маршрут ${req.method} ${req.originalUrl} не найден` });

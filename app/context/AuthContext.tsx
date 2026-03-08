@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 
 export type AuthUser = {
   id: number | string;
@@ -28,6 +28,7 @@ type AuthContextValue = {
   login: (payload: LoginPayload) => Promise<AuthUser>;
   register: (payload: RegisterPayload) => Promise<void>;
   logout: () => Promise<void>;
+  refreshProfile: () => Promise<AuthUser | null>;
 };
 
 const API_BASE_URL = "/api/auth";
@@ -207,6 +208,48 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const refreshProfile = useCallback(async () => {
+    const response = await fetch("/api/users/me", {
+      method: "GET",
+      credentials: "include",
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      if (response.status === 401 || response.status === 403) {
+        setUser(null);
+        setIsAuthenticated(false);
+        return null;
+      }
+
+      throw new Error("Не удалось обновить профиль.");
+    }
+
+    const data = (await response.json()) as {
+      id: number | string;
+      name: string;
+      email: string;
+      isSubscribed?: boolean;
+      subscriptionTier?: "free" | "premium";
+    };
+
+    const normalized: AuthUser = {
+      id: data.id,
+      name: data.name,
+      email: data.email,
+      isSubscribed: Boolean(data.isSubscribed),
+      subscriptionTier: data.subscriptionTier === "premium" ? "premium" : "free",
+    };
+
+    if (typeof window !== "undefined") {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
+    }
+
+    setUser(normalized);
+    setIsAuthenticated(true);
+    return normalized;
+  }, []);
+
   const logout = async () => {
     try {
       await fetch(`${API_BASE_URL}/logout`, {
@@ -252,8 +295,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [user]);
 
   const value = useMemo<AuthContextValue>(
-    () => ({ user, isAuthenticated, isSubscribed: Boolean(user?.isSubscribed), login, register, logout }),
-    [isAuthenticated, user],
+    () => ({ user, isAuthenticated, isSubscribed: Boolean(user?.isSubscribed), login, register, logout, refreshProfile }),
+    [isAuthenticated, refreshProfile, user],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

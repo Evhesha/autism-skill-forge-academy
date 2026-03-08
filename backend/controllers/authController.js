@@ -1,7 +1,5 @@
 const { User } = require('../models');
-const jwt = require('jsonwebtoken');
-
-const jwtSecret = process.env.JWT_SECRET || 'dev-secret';
+const { getAuthCookieOptions, setAuthCookie, toAuthUser } = require('../lib/auth');
 
 // Регистрация
 exports.register = async (req, res) => {
@@ -58,37 +56,10 @@ exports.login = async (req, res) => {
       return res.status(401).json({ error: 'Неверный email или пароль' });
     }
 
-    const token = jwt.sign(
-      {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        subscriptionTier: user.subscriptionTier,
-        isSubscribed: user.isSubscribed,
-      },
-      jwtSecret,
-      { expiresIn: '24h' }
-    );
-
-    const cookieOptions = {
-      // Allow frontend JS to read cookie (requested behavior).
-      httpOnly: false,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 24 * 60 * 60 * 1000,
-    };
-
-    res.cookie('token', token, cookieOptions);
+    const token = setAuthCookie(res, user);
 
     res.json({
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        isSubscribed: user.isSubscribed,
-        subscriptionTier: user.subscriptionTier,
-      },
+      user: toAuthUser(user),
       token,
     });
   } catch (err) {
@@ -99,10 +70,11 @@ exports.login = async (req, res) => {
 
 // Выход из аккаунта
 exports.logout = (req, res) => {
+  const cookieOptions = getAuthCookieOptions();
   res.clearCookie('token', {
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    path: '/',
+    secure: cookieOptions.secure,
+    sameSite: cookieOptions.sameSite,
+    path: cookieOptions.path,
   });
   res.json({ message: 'Выход выполнен' });
 };
