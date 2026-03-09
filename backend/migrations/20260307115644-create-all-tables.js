@@ -138,6 +138,7 @@ module.exports = {
       unique: true,
       name: 'user_progress_user_lesson_unique',
     });
+    
 
     await queryInterface.createTable('quiz_results', {
       id: {

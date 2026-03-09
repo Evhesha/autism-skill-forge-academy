@@ -47,7 +47,7 @@ export async function POST(request: Request) {
     } else {
       entries.push(
         ["line_items[0][price_data][currency]", process.env.STRIPE_PRICE_CURRENCY || "usd"],
-        ["line_items[0][price_data][unit_amount]", process.env.STRIPE_PRICE_AMOUNT || "2900"],
+        ["line_items[0][price_data][unit_amount]", process.env.STRIPE_PRICE_AMOUNT || "999"],
         ["line_items[0][price_data][product_data][name]", process.env.STRIPE_PRODUCT_NAME || "Premium Subscription"],
         ["line_items[0][price_data][recurring][interval]", process.env.STRIPE_PRICE_INTERVAL || "month"],
       );
