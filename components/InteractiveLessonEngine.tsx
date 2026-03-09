@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { Lock, StepBack, StepForward } from "lucide-react";
 import type { Lesson } from "@/constants/lessons";
 import { LessonScreenRenderer } from "@/components/LessonScreenRenderer";
@@ -10,9 +11,13 @@ import { fetchLessonProgress, saveLessonProgress } from "@/lib/lessonProgress";
 
 type Props = {
   lesson: Lesson;
+  nextLesson?: {
+    id: string;
+    shortTitle: string;
+  } | null;
 };
 
-export function InteractiveLessonEngine({ lesson }: Props) {
+export function InteractiveLessonEngine({ lesson, nextLesson = null }: Props) {
   const { isAuthenticated, isSubscribed } = useAuth();
   const requiresAuth = Boolean(lesson.requiresAuth);
   const lockMode = lesson.premium ? "premium" : requiresAuth ? "auth" : "none";
@@ -61,6 +66,7 @@ export function InteractiveLessonEngine({ lesson }: Props) {
     () => lesson.screens[Math.max(0, Math.min(lesson.screens.length - 1, effectiveStep - 1))],
     [lesson.screens, effectiveStep],
   );
+  const isCompleted = effectiveStep === totalSteps;
 
   return (
     <section className="space-y-6">
@@ -102,14 +108,34 @@ export function InteractiveLessonEngine({ lesson }: Props) {
               <StepBack size={16} /> Previous
             </button>
 
-            <button
-              type="button"
-              onClick={() => setCurrentStep((value) => Math.min(totalSteps, value + 1))}
-              disabled={effectiveStep === totalSteps || !effectiveLoaded}
-              className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-45"
-            >
-              Next <StepForward size={16} />
-            </button>
+            {isCompleted ? (
+              <div className="flex flex-wrap items-center justify-end gap-2">
+                <Link
+                  href="/"
+                  className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700"
+                >
+                  На dashboard
+                </Link>
+                {nextLesson ? (
+                  <Link
+                    href={`/lesson/${nextLesson.id}`}
+                    className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white"
+                  >
+                    Следующий урок
+                    <StepForward size={16} />
+                  </Link>
+                ) : null}
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setCurrentStep((value) => Math.min(totalSteps, value + 1))}
+                disabled={!effectiveLoaded}
+                className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-45"
+              >
+                Next <StepForward size={16} />
+              </button>
+            )}
           </div>
         </div>
 

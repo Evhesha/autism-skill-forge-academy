@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getLessonById } from "@/lib/lessonCatalog";
+import { getLessonById, getLessons } from "@/lib/lessonCatalog";
 import { InteractiveLessonEngine } from "@/components/InteractiveLessonEngine";
 
 export const dynamic = "force-dynamic";
@@ -10,11 +10,26 @@ type LessonPageProps = {
 
 export default async function LessonPage({ params }: LessonPageProps) {
   const { id } = await params;
-  const lesson = await getLessonById(id);
+  const [lesson, lessons] = await Promise.all([getLessonById(id), getLessons()]);
 
   if (!lesson) {
     notFound();
   }
 
-  return <InteractiveLessonEngine lesson={lesson} />;
+  const lessonIndex = lessons.findIndex((item) => item.id === lesson.id);
+  const nextLesson = lessonIndex >= 0 ? lessons[lessonIndex + 1] : undefined;
+
+  return (
+    <InteractiveLessonEngine
+      lesson={lesson}
+      nextLesson={
+        nextLesson
+          ? {
+              id: nextLesson.id,
+              shortTitle: nextLesson.shortTitle,
+            }
+          : null
+      }
+    />
+  );
 }
