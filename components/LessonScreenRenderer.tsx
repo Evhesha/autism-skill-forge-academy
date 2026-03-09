@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Image from "next/image";
 import type { LessonScreen } from "@/constants/lessons";
 
 type Props = {
@@ -61,6 +62,25 @@ export function LessonScreenRenderer({ screen }: Props) {
     () => (screen.type === "video" ? getYouTubeEmbedUrl(screen.videoUrl) : null),
     [screen],
   );
+  const screenImageUrl = useMemo(() => {
+    if (!screen.imageUrl) return null;
+    if (/^https?:\/\//.test(screen.imageUrl) || screen.imageUrl.startsWith("/")) return screen.imageUrl;
+    if (screen.imageUrl.startsWith("lessons-images/")) return `/${screen.imageUrl}`;
+    return `/lessons-images/${screen.imageUrl}`;
+  }, [screen.imageUrl]);
+  const screenImageAlt = screen.imageAlt || screen.title;
+  const screenImage = screenImageUrl ? (
+    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+      <Image
+        src={screenImageUrl}
+        alt={screenImageAlt}
+        width={1200}
+        height={675}
+        unoptimized
+        className="h-auto w-full object-cover"
+      />
+    </div>
+  ) : null;
 
   switch (screen.type) {
     case "checklist": {
@@ -84,6 +104,7 @@ export function LessonScreenRenderer({ screen }: Props) {
             <h2 className="text-2xl font-bold text-slate-900">{screen.title}</h2>
             {screen.subtitle && <p className="mt-1 text-sm text-slate-600">{screen.subtitle}</p>}
           </div>
+          {screenImage}
 
           <div className="space-y-2 rounded-2xl border border-slate-200 bg-white p-4">
             {screen.items.map((item, idx) => {
@@ -134,6 +155,7 @@ export function LessonScreenRenderer({ screen }: Props) {
             <h2 className="text-2xl font-bold text-slate-900">{screen.title}</h2>
             {screen.subtitle && <p className="mt-1 text-sm text-slate-600">{screen.subtitle}</p>}
           </div>
+          {screenImage}
 
           <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-950">
             {embeddedVideoUrl ? (
@@ -195,6 +217,7 @@ export function LessonScreenRenderer({ screen }: Props) {
             <h2 className="text-2xl font-bold text-slate-900">{screen.title}</h2>
             <p className="mt-1 text-sm text-slate-700">{screen.question.question}</p>
           </div>
+          {screenImage}
 
           <div className="space-y-2 rounded-2xl border border-slate-200 bg-white p-4">
             {screen.question.options.map((option, idx) => {
@@ -239,6 +262,7 @@ export function LessonScreenRenderer({ screen }: Props) {
             <h2 className="text-2xl font-bold text-slate-900">{screen.title}</h2>
             {screen.subtitle && <p className="mt-1 text-sm text-slate-600">{screen.subtitle}</p>}
           </div>
+          {screenImage}
 
           <div className="space-y-2">
             {screen.steps.map((step, idx) => {

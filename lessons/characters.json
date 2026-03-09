@@ -135,7 +135,8 @@
           "title": "Материалы",
           "details": "Покажите экран раздела, пример уровня и распределение персонажей по двум категориям."
         }
-      ]
+      ],
+      "imageUrl": "lessons-images/characters(1).png"
     },
     {
       "id": "characters-screen-7",

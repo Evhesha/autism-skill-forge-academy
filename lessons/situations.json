@@ -116,7 +116,9 @@
           "title": "Тренажёр AutismSkillForge",
           "details": "Сортировки можно делать карточками, но в тренажёре легче набрать много повторений."
         }
-      ]
+      ],
+      "imageUrl": "lessons-images/situations(1).png",
+      "imageUrl": "lessons-images/situations(2).png"
     },
     {
       "id": "situations-screen-6",

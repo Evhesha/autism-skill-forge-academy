@@ -43,6 +43,14 @@ function isLessonScreen(value: unknown): value is LessonScreen {
     return false;
   }
 
+  if ("imageUrl" in value && value.imageUrl !== undefined && typeof value.imageUrl !== "string") {
+    return false;
+  }
+
+  if ("imageAlt" in value && value.imageAlt !== undefined && typeof value.imageAlt !== "string") {
+    return false;
+  }
+
   switch (value.type) {
     case "checklist":
       return (

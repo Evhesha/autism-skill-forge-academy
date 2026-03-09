@@ -20,6 +20,8 @@ export type LessonScreen =
       type: "checklist";
       title: string;
       subtitle?: string;
+      imageUrl?: string;
+      imageAlt?: string;
       items: string[];
       feedback?: ChecklistFeedback[];
     }
@@ -28,6 +30,8 @@ export type LessonScreen =
       type: "video";
       title: string;
       subtitle?: string;
+      imageUrl?: string;
+      imageAlt?: string;
       videoUrl: string;
       captions: string[];
     }
@@ -36,6 +40,8 @@ export type LessonScreen =
       type: "quiz";
       title: string;
       subtitle?: string;
+      imageUrl?: string;
+      imageAlt?: string;
       question: QuizQuestion;
     }
   | {
@@ -43,6 +49,8 @@ export type LessonScreen =
       type: "protocol";
       title: string;
       subtitle?: string;
+      imageUrl?: string;
+      imageAlt?: string;
       steps: Array<{ title: string; details: string }>;
     };
 
