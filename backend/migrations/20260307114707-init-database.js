@@ -118,55 +118,9 @@ module.exports = {
       name: 'user_progress_user_lesson_unique'
     });
 
-    // Создаем таблицу quiz_results
-    await queryInterface.createTable('quiz_results', {
-      id: {
-        type: Sequelize.UUID,
-        defaultValue: Sequelize.UUIDV4,
-        primaryKey: true,
-      },
-      user_id: {
-        type: Sequelize.UUID,
-        allowNull: false,
-        references: {
-          model: 'users',
-          key: 'id',
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'CASCADE',
-      },
-      lesson_id: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        references: {
-          model: 'lessons',
-          key: 'id',
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'CASCADE',
-      },
-      score: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-      },
-      answers: {
-        type: Sequelize.JSONB,
-        defaultValue: [],
-      },
-      total_questions: {
-        type: Sequelize.INTEGER,
-        defaultValue: 0,
-      },
-      created_at: {
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.NOW,
-      },
-    });
   },
 
   async down(queryInterface, Sequelize) {
-    // Удаляем таблицы в обратном порядке (из-за внешних ключей)
-    await queryInterface.dropTable('quiz_results');
     await queryInterface.dropTable('user_progress');
     await queryInterface.dropTable('lessons');
     await queryInterface.dropTable('users');

@@ -22,19 +22,19 @@ export function AppHeader() {
           <span className="text-sm font-bold tracking-wide">AutismSkillForge</span>
         </Link>
         
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col items-end gap-2 sm:flex-row sm:items-center sm:gap-3">
           {isAuthenticated && user ? (
             <Link
               href="/profile"
-              className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition ${
+              className={`inline-flex min-w-0 items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition ${
                 pathname === "/profile"
                   ? "text-cyan-900"
                   : "text-slate-600 hover:bg-white hover:text-slate-900"
               }`}
             >
-              <span className="max-w-[140px] truncate">{user.name}</span>
+              <span className="max-w-[90px] truncate sm:max-w-[140px]">{user.name}</span>
               <span
-                className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${
+                className={`hidden rounded-full px-2 py-0.5 text-[11px] font-bold sm:inline-flex ${
                   isSubscribed ? "bg-emerald-100 text-emerald-700" : "bg-slate-200 text-slate-700"
                 }`}
               >

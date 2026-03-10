@@ -11,7 +11,6 @@ async function ensureDatabaseReady() {
         await sequelize.sync();
       }
     })().catch((error) => {
-      // Allow retry on next request if initialization failed.
       initPromise = null;
       throw error;
     });

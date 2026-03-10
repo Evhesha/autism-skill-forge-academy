@@ -1,7 +1,6 @@
 const { User } = require('../models');
 const { getAuthCookieOptions, setAuthCookie, toAuthUser } = require('../lib/auth');
 
-// Регистрация
 exports.register = async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -36,7 +35,6 @@ exports.register = async (req, res) => {
   }
 };
 
-// Вход в аккаунт
 exports.login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -68,7 +66,6 @@ exports.login = async (req, res) => {
   }
 };
 
-// Выход из аккаунта
 exports.logout = (req, res) => {
   const cookieOptions = getAuthCookieOptions();
   res.clearCookie('token', {

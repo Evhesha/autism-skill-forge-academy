@@ -2,7 +2,7 @@ import "server-only";
 
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
-import { type ChecklistFeedback, type Lesson, type LessonScreen, type QuizQuestion } from "@/constants/lessons";
+import { type ChecklistFeedback, type Lesson, type LessonScreen} from "@/constants/lessons";
 
 const LESSONS_DIR = path.join(process.cwd(), "lessons");
 
@@ -14,15 +14,6 @@ function isStringArray(value: unknown): value is string[] {
   return Array.isArray(value) && value.every((item) => typeof item === "string");
 }
 
-function isQuizQuestion(value: unknown): value is QuizQuestion {
-  return (
-    isObject(value) &&
-    typeof value.question === "string" &&
-    isStringArray(value.options) &&
-    typeof value.correctIndex === "number" &&
-    typeof value.explanation === "string"
-  );
-}
 
 function isChecklistFeedback(value: unknown): value is ChecklistFeedback {
   return (
@@ -61,8 +52,6 @@ function isLessonScreen(value: unknown): value is LessonScreen {
       );
     case "video":
       return typeof value.videoUrl === "string" && isStringArray(value.captions);
-    case "quiz":
-      return isQuizQuestion(value.question);
     case "protocol":
       return (
         Array.isArray(value.steps) &&
@@ -92,8 +81,6 @@ function isLesson(value: unknown): value is Lesson {
     typeof value.chain.b === "string" &&
     typeof value.chain.c === "string" &&
     isStringArray(value.readinessChecks) &&
-    Array.isArray(value.quiz) &&
-    value.quiz.every(isQuizQuestion) &&
     Array.isArray(value.screens) &&
     value.screens.every(isLessonScreen)
   );

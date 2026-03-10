@@ -2,11 +2,10 @@ services:
   db:
     image: postgres:15
     container_name: autism-skill-forge-academy-db
-    restart: always
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 2722
-      POSTGRES_DB: postgres  # используем стандартную базу
+      POSTGRES_DB: postgres
     ports:
       - "5432:5432"
     volumes:
@@ -20,7 +19,6 @@ services:
   adminer:
     image: adminer:latest
     container_name: autism-skill-forge-academy-adminer
-    restart: always
     ports:
       - "8080:8080"
     depends_on:

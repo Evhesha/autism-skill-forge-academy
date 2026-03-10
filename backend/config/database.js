@@ -11,7 +11,6 @@ if (isProduction && !databaseUrl) {
 
 const commonOptions = {
   dialect: 'postgres',
-  // Force including pg in serverless bundles (Vercel) instead of relying on dynamic require.
   dialectModule: pg,
   logging: process.env.NODE_ENV === 'development' ? console.log : false,
   define: {

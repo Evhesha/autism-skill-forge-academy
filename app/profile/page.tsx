@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -18,13 +18,29 @@ import { fetchAllLessonProgress, progressToPercent, type LessonProgressRecord } 
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { user, isAuthenticated, isSubscribed, logout } = useAuth();
+  const { user, isAuthenticated, isSubscribed, logout, refreshProfile } = useAuth();
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [progressMap, setProgressMap] = useState<Record<string, LessonProgressRecord>>({});
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
+  const [profileName, setProfileName] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [profileError, setProfileError] = useState<string | null>(null);
+  const [profileSuccess, setProfileSuccess] = useState<string | null>(null);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isDeleteConfirmed, setIsDeleteConfirmed] = useState(false);
 
   const handleLogout = async () => {
-    await logout();
-    router.push("/auth");
+    setIsLoggingOut(true);
+    try {
+      await logout();
+      router.push("/auth");
+    } finally {
+      setIsLoggingOut(false);
+    }
   };
 
   useEffect(() => {
@@ -70,6 +86,117 @@ export default function ProfilePage() {
       isCancelled = true;
     };
   }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (!isProfileModalOpen || !user) return;
+    setProfileName(user.name ?? "");
+    setNewPassword("");
+    setConfirmPassword("");
+    setProfileError(null);
+    setProfileSuccess(null);
+    setIsDeleteConfirmed(false);
+  }, [isProfileModalOpen, user]);
+
+  const handleSaveProfile = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!user) return;
+
+    const trimmedName = profileName.trim();
+    if (!trimmedName) {
+      setProfileError("Имя не может быть пустым.");
+      setProfileSuccess(null);
+      return;
+    }
+
+    if (newPassword && newPassword.length < 6) {
+      setProfileError("Пароль должен быть не короче 6 символов.");
+      setProfileSuccess(null);
+      return;
+    }
+
+    if (newPassword && newPassword !== confirmPassword) {
+      setProfileError("Пароли не совпадают.");
+      setProfileSuccess(null);
+      return;
+    }
+
+    const payload: { name?: string; password?: string } = {};
+    if (trimmedName !== user.name) payload.name = trimmedName;
+    if (newPassword) payload.password = newPassword;
+
+    if (Object.keys(payload).length === 0) {
+      setProfileError("Нет изменений для сохранения.");
+      setProfileSuccess(null);
+      return;
+    }
+
+    setIsSavingProfile(true);
+    setProfileError(null);
+    setProfileSuccess(null);
+    try {
+      const response = await fetch("/api/users/me", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const text = await response.text();
+        let message = "Не удалось сохранить изменения.";
+        try {
+          const parsed = JSON.parse(text) as { error?: string | string[] };
+          if (Array.isArray(parsed.error)) {
+            message = parsed.error.join(", ");
+          } else if (parsed.error) {
+            message = parsed.error;
+          }
+        } catch {
+          if (text) message = text;
+        }
+        throw new Error(message);
+      }
+
+      await refreshProfile();
+      setProfileSuccess("Изменения сохранены.");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (error) {
+      setProfileError(error instanceof Error ? error.message : "Ошибка сохранения.");
+    } finally {
+      setIsSavingProfile(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!user) return;
+    setIsDeletingAccount(true);
+    try {
+      const response = await fetch("/api/users/me", {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        const text = await response.text();
+        let message = "Не удалось удалить аккаунт.";
+        try {
+          const parsed = JSON.parse(text) as { error?: string };
+          if (parsed.error) message = parsed.error;
+        } catch {
+          if (text) message = text;
+        }
+        throw new Error(message);
+      }
+
+      await logout();
+      router.push("/auth");
+    } catch (error) {
+      setProfileError(error instanceof Error ? error.message : "Ошибка удаления аккаунта.");
+    } finally {
+      setIsDeletingAccount(false);
+    }
+  };
 
   const lessonStats = useMemo(() => {
     const records = lessons.map((lesson) => {
@@ -198,7 +325,10 @@ export default function ProfilePage() {
             </div>
 
             <div className="space-y-2">
-              <button className="flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left transition hover:bg-slate-50">
+              <button
+                onClick={() => setIsProfileModalOpen(true)}
+                className="flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left transition hover:bg-slate-50"
+              >
                 <span className="inline-flex items-center gap-3 text-sm font-medium"><Lock size={16} className="text-slate-400" />Настройки профиля</span>
                 <ChevronRight size={16} className="text-slate-300" />
               </button>
@@ -206,13 +336,148 @@ export default function ProfilePage() {
                 <span className="inline-flex items-center gap-3 text-sm font-medium"><Languages size={16} className="text-slate-400" /> Язык интерфейса</span>
                 <span className="text-sm text-slate-400">Русский</span>
               </button>
-              <button onClick={handleLogout} className="flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left text-red-600 transition hover:bg-red-50">
+              <button onClick={() => setIsLogoutConfirmOpen(true)} className="flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left text-red-600 transition hover:bg-red-50">
                 <span className="inline-flex items-center gap-3 text-sm font-bold"><LogOut size={16} /> Выйти из системы</span>
               </button>
             </div>
           </article>
         </section>
       </main>
+
+      {isProfileModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4 py-8"
+          onClick={(event) => {
+            if (event.currentTarget === event.target) {
+              setIsProfileModalOpen(false);
+            }
+          }}
+        >
+          <div className="w-full max-w-xl rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_30px_80px_rgba(15,23,42,0.25)]">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h3 className="text-xl font-black">Настройки профиля</h3>
+                <p className="mt-1 text-sm text-slate-500">Обновите имя, пароль или удалите аккаунт.</p>
+              </div>
+              <button
+                onClick={() => setIsProfileModalOpen(false)}
+                className="rounded-full px-3 py-1 text-sm font-bold text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                aria-label="Закрыть"
+              >
+                Закрыть
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveProfile} className="mt-6 space-y-4">
+              <div>
+                <label className="text-sm font-semibold text-slate-700">Имя</label>
+                <input
+                  value={profileName}
+                  onChange={(event) => setProfileName(event.target.value)}
+                  className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm shadow-sm focus:border-cyan-500 focus:outline-none"
+                  placeholder="Ваше имя"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-semibold text-slate-700">Новый пароль</label>
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={(event) => setNewPassword(event.target.value)}
+                  className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm shadow-sm focus:border-cyan-500 focus:outline-none"
+                  placeholder="Минимум 6 символов"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-semibold text-slate-700">Повторите пароль</label>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(event) => setConfirmPassword(event.target.value)}
+                  className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm shadow-sm focus:border-cyan-500 focus:outline-none"
+                  placeholder="Повторите новый пароль"
+                />
+              </div>
+
+              {profileError && (
+                <div className="rounded-2xl bg-red-50 px-4 py-2 text-sm text-red-700">
+                  {profileError}
+                </div>
+              )}
+              {profileSuccess && (
+                <div className="rounded-2xl bg-emerald-50 px-4 py-2 text-sm text-emerald-700">
+                  {profileSuccess}
+                </div>
+              )}
+
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <button
+                  type="submit"
+                  disabled={isSavingProfile}
+                  className="inline-flex items-center justify-center rounded-2xl bg-slate-900 px-5 py-3 text-sm font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isSavingProfile ? "Сохранение..." : "Сохранить изменения"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsProfileModalOpen(false)}
+                  className="inline-flex items-center justify-center rounded-2xl border border-slate-200 px-5 py-3 text-sm font-bold text-slate-600 transition hover:bg-slate-50"
+                >
+                  Отмена
+                </button>
+              </div>
+            </form>
+
+            <div className="mt-6 rounded-2xl border border-red-100 bg-red-50/70 p-4">
+              <h4 className="text-sm font-black text-red-700">Удаление аккаунта</h4>
+              <p className="mt-1 text-sm text-red-600">Аккаунт будет удален без возможности восстановления.</p>
+              <label className="mt-3 flex items-center gap-2 text-sm font-medium text-red-700">
+                <input
+                  type="checkbox"
+                  checked={isDeleteConfirmed}
+                  onChange={(event) => setIsDeleteConfirmed(event.target.checked)}
+                  className="h-4 w-4 rounded border-red-200 text-red-600"
+                />
+                Понимаю и подтверждаю удаление
+              </label>
+              <button
+                onClick={handleDeleteAccount}
+                disabled={isDeletingAccount || !isDeleteConfirmed}
+                className="mt-3 inline-flex items-center justify-center rounded-2xl bg-red-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isDeletingAccount ? "Удаление..." : "Удалить аккаунт"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isLogoutConfirmOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4 py-8">
+          <div className="w-full max-w-md rounded-[24px] border border-white/70 bg-white p-6 shadow-[0_30px_80px_rgba(15,23,42,0.25)]">
+            <h3 className="text-lg font-black">Подтверждение выхода</h3>
+            <p className="mt-2 text-sm text-slate-600">Вы точно хотите выйти из системы?</p>
+            <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-end">
+              <button
+                onClick={() => setIsLogoutConfirmOpen(false)}
+                className="inline-flex items-center justify-center rounded-2xl border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600 transition hover:bg-slate-50"
+              >
+                Отмена
+              </button>
+              <button
+                onClick={async () => {
+                  setIsLogoutConfirmOpen(false);
+                  await handleLogout();
+                }}
+                disabled={isLoggingOut}
+                className="inline-flex items-center justify-center rounded-2xl bg-red-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isLoggingOut ? "Выходим..." : "Выйти"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
