@@ -56,16 +56,73 @@ export default function HomePage() {
 
   return (
     <div className="space-y-8">
-      <section className="rounded-3xl bg-gradient-to-br from-cyan-700 via-blue-700 to-slate-900 p-6 text-white md:p-8">
-        <p className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em]">
-          <Sparkles size={14} /> AutismSkillForge Academy
-        </p>
-        <h1 className="max-w-3xl text-3xl font-black md:text-5xl">Интерактивная платформа электронного обучения для структурированного развития навыков.</h1>
-        <p className="mt-3 max-w-2xl text-sm text-cyan-100 md:text-base">
-          Добро пожаловать{user?.name ? `, ${user.name}` : ""}. Выберите урок и проходите экраны с чеклистами,
-          видео, тестами и протоколами в одном динамическом потоке.
-        </p>
-      </section>
+      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-700 via-blue-700 to-slate-900 p-6 text-white md:p-8">
+  {/* Декоративный элемент фона */}
+  <div className="absolute right-0 top-0 -mt-10 -mr-10 h-40 w-40 rounded-full bg-white/10 blur-3xl" />
+  <div className="absolute bottom-0 left-0 -mb-10 -ml-10 h-40 w-40 rounded-full bg-cyan-400/20 blur-3xl" />
+  
+  <div className="relative z-10">
+    <p className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] backdrop-blur-sm">
+      <Sparkles size={14} /> AutismSkillForge Academy
+    </p>
+    
+    <h1 className="max-w-3xl text-3xl font-black leading-tight md:text-5xl">
+      С возвращением в 
+      <span className="block text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-yellow-100">
+        мир структурированного обучения
+      </span>
+    </h1>
+    
+    <p className="mt-4 max-w-2xl text-sm text-cyan-100 md:text-base">
+      {user?.name ? (
+        <>Рады видеть вас, <span className="font-semibold text-white">{user.name}</span>! </>  
+      ) : (
+        <>Рады приветствовать вас! </>
+      )}
+      Продолжайте развивать навыки с нашими интерактивными уроками, чеклистами и тестами.
+    </p>
+
+    {/* Блок с мобильным приложением */}
+    <div className="mt-8 rounded-2xl bg-white/10 p-5 backdrop-blur-sm border border-white/20">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-1">
+          <h3 className="text-lg font-semibold">📱 Мобильное приложение</h3>
+          <p className="text-sm text-cyan-100">
+            Занимайтесь где угодно. Скачайте наше приложение для iOS и Android.
+          </p>
+        </div>
+        
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <a
+            href="https://play.google.com/store/apps/details?id=com.ASF.Sort&hl=ru"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-black/30 px-4 py-2.5 text-sm font-semibold transition hover:bg-black/40 hover:scale-105 active:scale-100 border border-white/20"
+          >
+            <img 
+              src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"
+              alt="Get it on Google Play"
+              className="h-8 w-auto"
+            />
+          </a>
+          
+          <a
+            href="https://apps.apple.com/by/app/autism-skillforge/id6759347576"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-black/30 px-4 py-2.5 text-sm font-semibold transition hover:bg-black/40 hover:scale-105 active:scale-100 border border-white/20"
+          >
+            <img 
+              src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg"
+              alt="Download on the App Store"
+              className="h-8 w-auto"
+            />
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
       <section>
         <div className="mb-4 flex items-end justify-between gap-4">
