@@ -52,6 +52,14 @@ function isLessonScreen(value: unknown): value is LessonScreen {
       );
     case "video":
       return typeof value.videoUrl === "string" && isStringArray(value.captions);
+    case "quiz":
+      return (
+        isObject(value.question) &&
+        typeof value.question.question === "string" &&
+        isStringArray(value.question.options) &&
+        typeof value.question.correctIndex === "number" &&
+        typeof value.question.explanation === "string"
+      );
     case "protocol":
       return (
         Array.isArray(value.steps) &&
